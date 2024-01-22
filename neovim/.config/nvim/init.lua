@@ -1,0 +1,2 @@
+require("cole")
+print("hello")
