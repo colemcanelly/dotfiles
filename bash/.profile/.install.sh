@@ -5,7 +5,7 @@ _PROFILE="./bash/.bash_profile"
 
 # Ask Y/n
 function ask () {
-    read -p "$1 (Y/n): " resp
+    printf "$1"; read -p " (Y/n): " resp
     if [ -z "$resp" ]; then
         response_lc="y" # empty is Yes
     else
@@ -25,21 +25,19 @@ function clean () {
 
 # Install dotfiles into profile
 function install () {
-    echo "running install"
-    echo >> $_PROFILE
-    echo '# >>> Install Custom dotfiles >>>' >> $_PROFILE
+    printf '# >>> Install Custom dotfiles >>>\n' >> $_PROFILE
     # Ask which files should be sourced
-    echo "Do you want $_PROFILE to source: "
+    echo "Do you want $(basename "$_PROFILE") to source: "
     for file in ./bash/.profile/*; do
         if [ -f "$file" ] && [ $(basename "$file") != ".install.sh" ]; then
             # echo $(basename "$file")
             filename=$(basename "$file")
-            if ask "${filename}?"; then
-                echo "source $(realpath "$file")" >> "$_PROFILE"
+            if ask "source ${filename%.*}?"; then
+                printf "source $(realpath "$file")\t# Custom ${filename%.*}\n" >> "$_PROFILE"
             fi
         fi
     done
-    echo '# <<< Install Custom dotfiles <<<' >> $_PROFILE
+    printf '# <<< Install Custom dotfiles <<<' >> $_PROFILE
 }
 
 case $1 in
