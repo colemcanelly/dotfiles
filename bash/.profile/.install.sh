@@ -32,8 +32,8 @@ function install () {
         if [ -f "$file" ] && [ $(basename "$file") != ".install.sh" ]; then
             # echo $(basename "$file")
             filename=$(basename "$file")
-            if ask "source ${filename%.*}?"; then
-                printf "source $(realpath "$file")\t# Custom ${filename%.*}\n" >> "$_PROFILE"
+            if ask " source ${filename%.*}?"; then
+                printf " source $(realpath "$file")\t# Custom ${filename%.*}\n" >> "$_PROFILE"
             fi
         fi
     done
