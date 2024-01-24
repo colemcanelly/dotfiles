@@ -29,3 +29,6 @@ alias npp="/mnt/c/Windows/System32/notepad.exe"
 # For redirecting to Windows clipboard
 alias setclip="xclip -selection c"
 alias getclip="xclip -selection c -o"
+
+# Fix for stow bug
+alias stow="stow $@ 2> >(grep -v 'BUG in find_stowed_path? Absolute/relative mismatch' 1>&2)"

@@ -1,4 +1,5 @@
 .PHONY: clean profile profile-clean dry
+all: adopt install
 
 # Bash Profile installation
 profile:
@@ -14,16 +15,12 @@ dry:
 
 
 # Main installation
-all:
-	profile-clean
-	profile
-	stow --verbose --dotfiles --target=$$HOME --restow */
+install: profile-clean profile
+	stow --dotfiles --target=$$HOME --restow */
 
-install:
-	stow --verbose --adopt --dotfiles --target=$$HOME */
-	git restore .
-	all
+adopt:
+	stow --adopt --dotfiles --target=$$HOME */
+	git clean -f
 
-clean:
-	clean-profile
+clean: clean-profile
 	stow --verbose --dotfiles --target=$$HOME --delete */
