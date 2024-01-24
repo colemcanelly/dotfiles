@@ -1,3 +1,5 @@
+# Source our bashrc if it exists
+ [[ -f ~/.bashrc ]] && source ~/.bashrc
 # Case-Insensitive Auto Completion
  bind "set completion-ignore-case on" 
 # >>> Install Custom dotfiles >>>
