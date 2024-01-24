@@ -10,13 +10,20 @@ profile-clean:
 
 # Testing
 dry:
-	stow --verbose --simulate --target=$$HOME --restow */
+	stow --verbose --simulate --dotfiles --target=$$HOME */
 
 
 # Main installation
 all:
-	stow --verbose --target=$$HOME --restow */
+	profile-clean
+	profile
+	stow --verbose --dotfiles --target=$$HOME --restow */
+
+install:
+	stow --verbose --adopt --dotfiles --target=$$HOME */
+	git restore .
+	all
 
 clean:
 	clean-profile
-	stow --verbose --target=$$HOME --delete */
+	stow --verbose --dotfiles --target=$$HOME --delete */

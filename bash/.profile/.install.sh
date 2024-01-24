@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-_PROFILE="./bash/.bash_profile"
+_PROFILE="./bash/dot-bash_profile"
 
 
 # Ask Y/n
@@ -27,7 +27,7 @@ function clean () {
 function install () {
     printf '# >>> Install Custom dotfiles >>>\n' >> $_PROFILE
     # Ask which files should be sourced
-    echo "Do you want $(basename "$_PROFILE") to source: "
+    echo "Do you want ${_PROFILE##*dot-} to source: "
     for file in ./bash/.profile/*; do
         if [ -f "$file" ] && [ $(basename "$file") != ".install.sh" ]; then
             # echo $(basename "$file")
