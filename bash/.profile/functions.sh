@@ -17,3 +17,11 @@ function extract () {
         echo "'$1' is not a valid file"
     fi
 }
+
+# Overload to use sshpass with certain ssh targets
+function ssh () {
+    case $1 in
+        465ctf) sshpass -f ~/csce465/ctfinfo/passwd.txt ssh 465ctf;;
+        *) ssh "$@";;
+    esac
+}
