@@ -76,7 +76,7 @@ __myps1_workdir() {
     # \w = Full path
     # \W = Working Dir
 
-    echo "[\[${BLUE}\]\W\[${reset}\]]";
+    echo " [\[${BLUE}\]\W\[${reset}\]]";
 }
 
 __myps1_git() {
@@ -90,12 +90,12 @@ __myps1_git() {
 
 __myps1_box_top() {
     local reset=`tput sgr0`;
-    echo "\[${BLUE}\]╭╴\[${reset}\]"
+    echo "\n\[${BLUE}\]╭╴\[${reset}\]"
 }
 
 __myps1_box_bottom() {
     local reset=`tput sgr0`;
-    echo "\[${BLUE}\]╰╴\[${reset}\]"
+    echo "\n\[${BLUE}\]╰╴\[${reset}\]"
 }
 
 
@@ -107,7 +107,7 @@ __myps1_user_prompt() {
 }
 
 __myps1() {
-    local ps1="\n$(__myps1_box_top)$(__myps1_debian_chroot)$(__myps1_exitcode)$(__myps1_time)$(__myps1_username)$(__myps1_arrow) $(__myps1_workdir)$(__myps1_git)\n$(__myps1_box_bottom)$(__myps1_user_prompt)";
+    local ps1="$(__myps1_box_top)$(__myps1_debian_chroot)$(__myps1_exitcode)$(__myps1_time)$(__myps1_username)$(__myps1_arrow)$(__myps1_workdir)$(__myps1_git)$(__myps1_box_bottom)$(__myps1_user_prompt)";
 
     echo "$ps1";
 }
