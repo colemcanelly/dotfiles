@@ -11,12 +11,11 @@
 #   -R      recursive
 #   -1      One per line
 
-alias ls='ls --color=auto'
+alias ls='ls --group-directories-first --color=auto'
 alias l='ls -F --group-directories-first --color=auto'
-alias la='ls -A --color=auto'
+alias lr='l -R --color=auto'
 alias ll='l -o --color=auto'
-alias lv='la -lF --color=auto'
-alias lr='la -FR --color=auto'
+alias la='ll -A --color=auto'
 
 # Remove "Zone.Identifier files"
 alias rmzi='find . -type f | grep ":Zone.Identifier" | xargs rm'
