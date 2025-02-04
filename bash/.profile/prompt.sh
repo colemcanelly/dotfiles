@@ -4,7 +4,6 @@
 
 # For Git PS1
 # source /usr/lib/git-core/git-sh-prompt;
-source ~/.bash_git;
 # GIT_PS1_SHOWDIRTYSTATE=1
 # GIT_PS1_SHOWUPSTREAM="verbose"
 
@@ -59,7 +58,7 @@ __myps1() {
     local GIT="\$(__git_ps1 '(\[${git_color}\]%s\[${reset}\])')";
     local PROMPT="\[${bold}\]${prompt_char}\[${reset}\] ";
 
-    local ps1="$BOX_TOP$(__myps1_debian_chroot)$EXIT $TIME $USER $ARROW $DIR $GIT $BOX_BOT$PROMPT";
+    local ps1="$BOX_TOP$EXIT $TIME $USER $ARROW $DIR $GIT $BOX_BOT$PROMPT";
 
     echo "$ps1";
 }
