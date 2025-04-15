@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+pushd ./bat-extras >/dev/null
+sim ./build.sh --install --prefix=${HOME}/.local/bin
+popd >/dev/null

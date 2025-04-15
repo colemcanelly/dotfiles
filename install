@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+
+# ==================== CONFIG ====================
+# Create temp file for use, and set cleanup on script exit
+TEMP_FILE=$(mktemp) ; trap 'rm -f "$TEMP_FILE"' EXIT
+    
+DIRS=(*/)
+IGNORE_DIRS=(
+    backups
+)
+
+
+    
+RED="\033[0;31m";
+YELLOW="\033[0;33m";
+GREEN="\033[0;92m";
+CYAN="\033[0;36m";
+BOLD="\033[1m";
+RESET="\033[0m";
+
+ARGS=("$@")
+
+# ==================== UTILS ====================
+function check_cmds() { 
+    for cmd in "$@"; do
+        if command -v $cmd &> /dev/null; then continue; fi
+        echo "Error: $cmd is not installed." >&2
+        exit 1
+    done
+};
+
+# Highlight stderr in red
+function color()(set -o pipefail;"$@" 2> >(sed $'s,.*,\e[33m&\e[m,'>&2))
+
+function sim() {
+    if [[ " ${ARGS[*]} " =~ " --simulate " ]]; then
+        if [[ "$1" == "echo" ]]; then
+            echo -e "${YELLOW}${@:2}${RESET}"
+        else
+            echo -e "${YELLOW}$*${RESET}"
+        fi
+        return -1
+    else
+        if [[ "$1" == "echo" ]]; then
+            "$@"
+        else
+            echo -e "$*"
+            "$@" >/dev/null
+        fi
+        return 0
+    fi
+}
+
+# Fix for stow bug
+function stow {
+    local opts="-t$HOME -v  --dotfiles --ignore=install"
+    color command stow $opts "$@" 2> >(
+        sed 's/=>/->/g' |
+        grep -v 'BUG in find_stowed_path? Absolute/relative mismatch' 1>&2
+    ) 
+}
+
+function center() {
+    local pad_char="$1"
+    local s="$3"
+    local str_no_color=$(echo -e "$s" | sed 's/\x1b\[[0-9;]*[mGKH]//g')
+    local width="${2:-80}"
+    local str_len=${#str_no_color}
+
+    if (( width <= str_len )); then
+        printf '%s\n' "$s"
+        return
+    fi
+
+    local pad_total=$((width - str_len))
+    local pad_left=$((pad_total / 2))
+    local pad_right=$((pad_total - pad_left))
+
+    printf '%*s' "$pad_left" '' | tr ' ' "$pad_char"
+    printf '%b' "$s"
+    printf '%*s\n' "$pad_right" '' | tr ' ' "$pad_char"
+}
+
+# ==================== Implementation ====================
+
+# Function to backup directories
+function backup_files() {
+    local files=($(sed 's/ /\n/g' <(echo "$1")))
+
+    local simulate="$2"
+
+    local backup_root="backups"
+
+    mkdir -p "$backup_root"
+    
+    # Process each conflicting file
+    for target in "${files[@]}"; do
+        target=$(echo "$target" | sed 's/\x1b\[[0-9;]*[mGKH]//g')
+        target_path="$HOME/$target"
+        
+        if [[ -f "$target_path" && ! -L "$target_path" ]]; then
+            if [[ $simulate == "--simulate" ]]; then
+                echo -e "${YELLOW}Backing up file: $target_path${RESET}"
+            else
+                echo "Backing up file: $target_path"
+                # Use the full path from home directory for backup structure
+                local rel_path="${target#$HOME/}"
+                local backup_path="$backup_root/$(dirname "$rel_path")"
+                mkdir -p "$backup_path"
+                mv "$target_path" "$backup_path/"
+                # echo -e "\t$target -> $backup_root/$target"
+            fi
+        fi
+    done
+}
+
+function main() {
+    check_cmds stow rg
+
+    local simulate=""
+    if [[ " $* " == *"--simulate"* ]]; then
+        simulate="--simulate"
+    fi
+
+    echo -e "${BOLD}Installing Dotfiles...${RESET}"
+
+    for d in "${DIRS[@]}"; do
+        local dir="${d%/}"
+        # Skip ignored directories
+        if [[ " ${IGNORE_DIRS[@]} " =~ " $dir " ]]; then
+            continue
+        fi
+        center '-' 40 " ${CYAN}${BOLD}$dir${RESET} ";
+        
+        if [[ -f "${dir}/install" ]]; then
+            pushd "$dir" > /dev/null
+            source ./install "$@"
+            popd > /dev/null
+        fi
+
+
+        stow $@ "$dir" 2>"$TEMP_FILE"
+
+        if grep -q "WARNING! stowing $dir would cause conflicts" "$TEMP_FILE"; then
+            local conflict_files=$(rg 'existing target is neither a link nor a directory: (\S*)' -or '$1' "$TEMP_FILE" | sort | uniq )
+            backup_files "$conflict_files" "$simulate"
+            stow "$@" "$dir" 2>"$TEMP_FILE"
+        fi
+
+        [[ $simulate == "--simulate" ]] && cat "$TEMP_FILE" >&2
+
+    done
+}
+
+
+main "$@"
