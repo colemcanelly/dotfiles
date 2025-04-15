@@ -1,5 +1,29 @@
 #!/usr/bin/env bash
-
 pushd ./bat-extras >/dev/null
-log ./build.sh --install --prefix=${HOME}/.local/bin
+
+function check_installed() {
+    local prefix="$1"
+    local scripts=(./src/*)
+    # check if all the scripts are already installed
+    for script in "${scripts[@]}"; do
+        local name=$(basename "${script%.*}")
+        if ! [[ -f "$prefix/$name" ]]; then
+            return -1
+        fi
+    done
+    return 0
+}
+
+prefix="${HOME}/.local/bin"
+echo -en " bat-extras"
+
+if ! check_installed "$prefix"; then
+    # echo ""
+    log echo -e "${SMALL}  this may take several moments...${RESET}"
+    log ./build.sh --install --prefix=${prefix}
+fi
+
+echo -e "${SMALL}  ...done${RESET}"
+unset prefix
+
 popd >/dev/null

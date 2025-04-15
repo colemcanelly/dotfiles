@@ -15,7 +15,9 @@ RED="\033[0;31m";
 YELLOW="\033[0;33m";
 GREEN="\033[0;92m";
 CYAN="\033[0;36m";
+
 BOLD="\033[1m";
+SMALL="\033[2m";
 RESET="\033[0m";
 
 ARGS=("$@")
@@ -33,17 +35,18 @@ function check_cmds() {
 function color()(set -o pipefail;"$@" 2> >(sed $'s,.*,\e[33m&\e[m,'>&2))
 
 function log() {
-    local cmds="$*"
-    [[ "$1" == "echo" ]] && cmds="${@:2}";
+    local original_args=("$@")
+    [[ "$1" == "echo" ]] && shift;
 
+    printf " "
     if [[ " ${ARGS[*]} " =~ " --simulate " ]]; then
         printf "${YELLOW}"
-        printf '%s' "$cmds"
+        echo -n "$@"
         printf "${RESET}\n"
         return -1
     else
-        echo "$cmds"
-        "$@" >/dev/null
+        echo "$@"
+        ${original_args[@]} >/dev/null
         return 0
     fi
 }
