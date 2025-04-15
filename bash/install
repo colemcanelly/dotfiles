@@ -10,18 +10,19 @@ function insert-into() {
         echo "Text already exists in $file"
         return
     fi
-    sed -i "${line}s|^|${text}\n|" "$file"
+    # sed -i "${line}s|^|${text}\n|" "$file"
+    echo "$text" >> "$file"
 }
 
 function include-scripts() {
-    insert-into ./dot-bash_profile "# >>> Install Custom dotfiles >>>"
+    insert-into "${HOME}/.bashrc" "# >>> Install Custom dotfiles >>>"
 
     for inc in ./include/*; do
         f=$(realpath "$inc")
-        insert-into ./dot-bash_profile "source $f"
+        insert-into "${HOME}/.bashrc" "source $f"
     done
 
-    insert-into ./dot-bash_profile "# <<< Install Custom dotfiles <<<"
+    insert-into "${HOME}/.bashrc" "# <<< Install Custom dotfiles <<<"
 }
 
 log include-scripts
