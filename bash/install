@@ -1,3 +1,19 @@
 #!/usr/bin/env bash
 
-sim echo "Installing bash" "$@"
+function insert-into() {
+    local file="$1"
+    local line=1
+    local text="$2"
+
+    # Insert the text at the specified line number
+    sed -i "${line}s|^|${text}|" "$file"
+}
+
+log insert-into ./dot-bash_profile "# >>> Install Custom dotfiles >>>\n"
+
+for inc in ./include/*; do
+    f=$(realpath "$inc")
+    log insert-into ./dot-bash_profile "source $f\n"
+done
+
+log insert-into ./dot-bash_profile "# <<< Install Custom dotfiles <<<\n"

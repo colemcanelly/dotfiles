@@ -32,19 +32,21 @@ function check_cmds() {
 # Highlight stderr in red
 function color()(set -o pipefail;"$@" 2> >(sed $'s,.*,\e[33m&\e[m,'>&2))
 
-function sim() {
+function log() {
     if [[ " ${ARGS[*]} " =~ " --simulate " ]]; then
+        printf "${YELLOW}"
         if [[ "$1" == "echo" ]]; then
-            echo -e "${YELLOW}${@:2}${RESET}"
+            printf '%s' "${@:2}"
         else
-            echo -e "${YELLOW}$*${RESET}"
+            printf '%s' "$*"
         fi
+        printf "${RESET}\n"
         return -1
     else
         if [[ "$1" == "echo" ]]; then
             "$@"
         else
-            echo -e "$*"
+            echo "$*"
             "$@" >/dev/null
         fi
         return 0

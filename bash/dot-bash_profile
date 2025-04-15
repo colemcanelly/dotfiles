@@ -1,9 +1,19 @@
+# <<< Install Custom dotfiles <<<
+source /home/cole/.config/.dotfiles/bash/include/ssh_login.sh
+source /home/cole/.config/.dotfiles/bash/include/prompt.sh
+source /home/cole/.config/.dotfiles/bash/include/functions.sh
+# >>> Install Custom dotfiles >>>
 # Source our bashrc if it exists
  [[ -f ~/.bashrc ]] && source ~/.bashrc
+ if ! command -v neofetch 2>&1 >/dev/null
+ then
+     echo "neofetch could not be found"
+     echo "sudo apt install neofetch"
+ else
+    neofetch
+ fi
 # Case-Insensitive Auto Completion
  bind "set completion-ignore-case on" 
-# >>> Install Custom dotfiles >>>
- source /home/cole/.config/.dotfiles/bash/.profile/functions.sh	# Custom functions
- source /home/cole/.config/.dotfiles/bash/.profile/prompt.sh	# Custom prompt
- source /home/cole/.config/.dotfiles/bash/.profile/ssh_login.sh	# Custom ssh_login
-# <<< Install Custom dotfiles <<<
+
+
+eval "$(batman --export-env)"
