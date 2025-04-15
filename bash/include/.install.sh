@@ -28,7 +28,7 @@ function install () {
     printf '# >>> Install Custom dotfiles >>>\n' >> $_PROFILE
     # Ask which files should be sourced
     echo "Do you want ${_PROFILE##*dot-} to source: "
-    for file in ./bash/.profile/*; do
+    for file in ./bash/include/*; do
         if [ -f "$file" ] && [ $(basename "$file") != ".install.sh" ]; then
             # echo $(basename "$file")
             filename=$(basename "$file")

@@ -41,3 +41,35 @@ function ssh () {
         *) /usr/bin/ssh "$@";;
     esac
 }
+
+
+
+# convert first measurement to the second units
+function convert() {
+    units -to %.0f $1 $2
+}
+
+function diff-test-coverage () {
+    local changed_files="git diff origin/develop --name-only";
+    local test_files=($(eval $changed_files | rg '/src/.*\.spec.(ts|tsx|js|jsx)$'));
+    local src_files=($(comm -23 <(eval \$changed_files | rg '/src/.*\.(ts|tsx|js|jsx)$') <(printf "%s\n" ${test_files[@]}| sort)));
+
+    local red="\033[0;31m";
+    local green="\033[0;92m";
+    local bold="\033[1m";
+    local reset="\033[0m";
+
+
+    for src in "${src_files[@]}"; do
+        local pretty_src="$(echo ${src} | sed -E 's|.*/([^/]+)/src/|@\1/src/|')";
+        local ext="${src##*.}";
+        local test_file="${src%.*}.spec.${ext}";
+        if [[ " ${test_files[*]} " =~ " ${test_file} " ]]; then
+            printf "${green}${bold}${pretty_src}${reset} -> ${green}$(basename $test_file)"
+        else
+            printf "${red}${pretty_src}"
+        fi
+
+        printf "${reset}\n"
+    done
+}
