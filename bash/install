@@ -1,28 +1,45 @@
 #!/usr/bin/env bash
 
-function insert-into() {
-    local file="$1"
-    local line=1
-    local text="$2"
+FILE="${HOME}/.bashrc"
 
-    # Insert the text at the specified line number
-    if grep -q "$text" "$file"; then
-        echo "Text already exists in $file"
-        return
-    fi
-    # sed -i "${line}s|^|${text}\n|" "$file"
-    echo "$text" >> "$file"
+IFS=$'\n';
+INCLUDE=(
+    "# ##### Custom dotfiles #####"
+    $(realpath ./include/* | xargs -I@ echo "source @")
+    "# ##### End dotfiles #####"
+)
+IFS=$' \t\n';
+
+function insert-into() { echo "$1" >> "$FILE"; }
+
+function clean() {
+    local escaped=$(echo "$1" | sed 's|/|\\/|g')
+    sed -i "/${escaped}/d" "$FILE"
+}
+
+function check_installed() {
+    for inc in "${INCLUDE[@]}"; do
+        grep -q "$inc" "$FILE" || return -1
+    done
+    return 0
 }
 
 function include-scripts() {
-    insert-into "${HOME}/.bashrc" "# >>> Install Custom dotfiles >>>"
-
-    for inc in ./include/*; do
-        f=$(realpath "$inc")
-        insert-into "${HOME}/.bashrc" "source $f"
+    for inc in "${INCLUDE[@]}"; do
+        clean "$inc"
+        insert-into "$inc"
     done
-
-    insert-into "${HOME}/.bashrc" "# <<< Install Custom dotfiles <<<"
 }
 
-log include-scripts
+
+echo -en " Include scripts into bashrc"
+
+if ! check_installed; then
+    echo ""
+    log include-scripts
+fi
+
+echo -e "${SMALL}  ...done${RESET}"
+
+unset FILE
+unset INCLUDE
