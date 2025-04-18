@@ -1,1 +1,6 @@
 backups
+
+
+**/*.d
+**/*.o
+ansi-colors/.local/bin/colors

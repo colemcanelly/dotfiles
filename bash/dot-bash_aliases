@@ -29,9 +29,6 @@ alias chrome='/mnt/c/Program\ Files/Google/Chrome/Application/chrome.exe'
 # Remove "Zone.Identifier files"
 alias rmzi='find . -type f | grep ":Zone.Identifier" | xargs rm'
 
-# For reminding me how to use ansi escape colors
-alias colors='~/bin/ansi_colors'
-
 # Launching Notepad from WSL Ubuntu
 alias npp="/mnt/c/Windows/System32/notepad.exe"
 

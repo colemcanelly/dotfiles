@@ -1,0 +1,9 @@
+
+
+echo -en " ansi-colors"
+
+if ! [[ " $* " == *"--simulate"* ]]; then
+    make >/dev/null
+fi
+
+echo -e "${SMALL}  ...done${RESET}"
