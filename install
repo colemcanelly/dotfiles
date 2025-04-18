@@ -65,10 +65,10 @@ function stow {
     command stow $opts "$@" 2> >(
         sed '/BUG in find_stowed_path?/d' \
         | sed 's/=>/->/g' \
-        | sed "s/^LINK\: /$(echo -e "${GREEN}   LINK: ${RESET}")/g" \
-        | sed "s/^UNLINK\: /$(echo -e "${SMALL}${GREEN} UNLINK: ${RESET}")/g" \
-        | sed "s/^WARNING\: /$(echo -e "${YELLOW}WARNING: ${RESET}")/g" \
-        | sed "s/^WARNING\! /$(echo -e "${BOLD}${RED}WARNING! ${RESET}")/g" \
+        | sed "s/^LINK\: /$(echo -e "${GREEN}    LINK: ${RESET}")/g" \
+        | sed "s/^UNLINK\: /$(echo -e "${SMALL}${GREEN}  UNLINK: ${RESET}")/g" \
+        | sed "s/^WARNING\: /$(echo -e "${YELLOW} WARNING: ${RESET}")/g" \
+        | sed "s/^WARNING\! /$(echo -e "${BOLD}${RED} WARNING! ${RESET}")/g" \
         >"$TEMP_FILE"
     )
     $(
@@ -163,7 +163,7 @@ function main() {
         stow $@ "$dir"
 
         case "$?" in
-            0)  echo -e "${SMALL}${BOLD}${LIGHT_GREEN}Installed $dir${RESET}";;     # TODO: fix weird coloring
+            0)  ;;
             1)  echo -e "${BOLD}${RED}Stow failed for $dir${RESET}"
                 cat "$TEMP_FILE" 
                 ;;
