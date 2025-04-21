@@ -27,18 +27,15 @@ DEPS=$(patsubst $(SRCDIR)/%.cpp,$(DEPDIR)/%.d,$(SRCS))
 
 
 # ###################### Targets ######################
-all: $(BIN)
-
-
-# Link the final binary
+# Link the final binary			(default target)
 $(BIN): $(OBJS) | $(BINDIR)
 	@ $(CPP) $(CPPFLAGS) -o $@ $^ $(LDLIBS)
-	$(info ./$@)
+	@ echo "    \e[2m$@\e[0m"
 
 
 # Compile to objects
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR) $(DEPDIR)
-	$(info $@...)
+	@ echo "    \e[2m$@...\e[0m"
 	@ $(CPP) $(CPPFLAGS) -MF $(DEPDIR)/$*.d -c -o $@ $<
 
 
@@ -47,7 +44,11 @@ $(OBJDIR): ; @mkdir -p $(OBJDIR)
 $(BINDIR): ; @mkdir -p $(BINDIR)
 $(DEPDIR): ; @mkdir -p $(DEPDIR)
 
-.PHONY: clean test
+
+# Phony targets
+.PHONY: clean all test
+
+install: clean $(BIN)
 
 clean:
 	rm -f $(OBJDIR)/*.o $(DEPDIR)/*.d $(BINDIR)/*

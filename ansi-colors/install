@@ -2,8 +2,12 @@
 
 echo -en " ansi-colors"
 
-if ! [[ " $* " == *"--simulate"* ]]; then
-    make >/dev/null
+
+if ! make -q >/dev/null; then
+    if ! [[ " $* " == *"--simulate"* ]]; then
+        echo ""
+        make -j
+    fi
 fi
 
 echo -e "${SMALL}  ...done${RESET}"
