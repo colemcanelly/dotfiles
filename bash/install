@@ -4,9 +4,10 @@ FILE="${HOME}/.bashrc"
 
 IFS=$'\n';
 INCLUDE=(
-    "# ##### Custom dotfiles #####"
+    "shopt -s extglob"
+    "# dotfiles"
     $(realpath ./include/* | xargs -I@ echo "source @")
-    "# ##### End dotfiles #####"
+    "# dotfiles end"
 )
 IFS=$' \t\n';
 
@@ -39,7 +40,7 @@ if ! check_installed; then
     log include-scripts
 fi
 
-echo -e "${SMALL}  ...done${RESET}"
+echo "$(small)  ...done$(reset)"
 
 unset FILE
 unset INCLUDE

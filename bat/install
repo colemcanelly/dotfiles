@@ -19,11 +19,11 @@ echo -en " bat-extras"
 
 if ! check_installed "$prefix"; then
     # echo ""
-    log echo -e "${SMALL}  this may take several moments...${RESET}"
+    log echo "$(small)  this may take several moments...$(reset)"
     log ./build.sh --install --prefix=${prefix}
 fi
 
-echo -e "${SMALL}  ...done${RESET}"
+echo "$(small)  ...done$(reset)"
 unset prefix
 
 popd >/dev/null

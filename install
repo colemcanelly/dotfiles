@@ -1,55 +1,66 @@
 #!/usr/bin/env bash
+shopt -s extglob
+
+# ==================== INCLUDES ====================
+for f in $(dirname "$0")/include/*.sh; do source $f; done
+
+# ==================== USAGE ====================
+USAGE=$(cat << EOF
+Usage: $0 [options] [tool1 tool2 ...]
+$(bold;underline)Options:$(reset)
+  $(bold)-s, --simulate$(reset)    Simulate the installation without making changes
+  $(bold)-R, --restow$(reset)      Restow all directories, even if they are already stowed
+  $(bold)-h, --help$(reset)        Show this help message
+EOF
+)
+
+SIMULATE=false
+RESTOW=false
+tool_args=()
+
+# Parse options and collect tool names
+for arg in "$@"; do
+    case "$arg" in
+    -h|--help)
+        echo "$USAGE";
+        exit 0
+        ;;
+    -R|--restow) RESTOW=true ;;
+    -s|--simulate) SIMULATE=true ;;
+    -*|--*)
+        echo "Error: Unsupported flag $1" >&2
+        exit 1
+        ;;
+    *) 
+        if [[ " $(echo */) " =~ " $arg/ "  ]]; then
+            tool_args+=("$arg") 
+        else
+            echo "Error: Invalid argument $arg" >&2;
+            exit 1 
+        fi ;;
+    esac
+done
+
+# Set DIRS to tool_args if any, else to all directories
+DIRS=($(
+    [[ ${#tool_args[@]} -gt 0 ]] \
+    && echo "${tool_args[@]}"    \
+    || echo !(include|backups|test)/
+))
 
 # ==================== CONFIG ====================
 # Create temp file for use, and set cleanup on script exit
 TEMP_FILE=$(mktemp) ; trap 'rm -f "$TEMP_FILE"' EXIT
-    
-DIRS=(*/)
-IGNORE_DIRS=(
-    backups
-)
-
-
-# ==================== COLORS ====================
-# ANSI color codes
-RED="\e[31m";
-GREEN="\e[32m";
-YELLOW="\e[33m";
-BLUE="\e[34m";
-MAGENTA="\e[35m";
-CYAN="\e[36m";
-
-LIGHT_RED="\e[91m";
-LIGHT_GREEN="\e[92m";
-LIGHT_YELLOW="\e[93m";
-LIGHT_BLUE="\e[94m";
-LIGHT_MAGENTA="\e[95m";
-LIGHT_CYAN="\e[96m";
-
-BOLD="\e[1m";
-SMALL="\e[2m";
-RESET="\e[0m";
-
-ARGS=("$@")
 
 # ==================== UTILS ====================
-function check_cmds() { 
-    for cmd in "$@"; do
-        if command -v $cmd &> /dev/null; then continue; fi
-        echo "Error: $cmd is not installed." >&2
-        exit 1
-    done
-};
 
 function log() {
     local original_args=("$@")
     [[ "$1" == "echo" ]] && shift;
 
     printf "   "
-    if [[ " ${ARGS[*]} " =~ " --simulate " ]]; then
-        printf "${YELLOW}"
-        echo -n "$@"
-        printf "${RESET}\n"
+    if [[ $SIMULATE == true ]]; then
+        echo -n "$(yellow)$@$(reset)"
         return -1
     else
         echo "$@"
@@ -60,15 +71,18 @@ function log() {
 
 # Fix for stow bug
 # Apply colors to stow output
-function stow {
+function stow {\
     local opts="-t$HOME -v  --dotfiles --ignore=install"
+    [[ $SIMULATE == true ]] && opts+=" --simulate";
+    [[ $RESTOW == true ]] && opts+=" --restow";
+
     command stow $opts "$@" 2> >(
         sed '/BUG in find_stowed_path?/d' \
         | sed 's/=>/->/g' \
-        | sed "s/^LINK\: /$(echo -e "${GREEN}    LINK: ${RESET}")/g" \
-        | sed "s/^UNLINK\: /$(echo -e "${SMALL}${GREEN}  UNLINK: ${RESET}")/g" \
-        | sed "s/^WARNING\: /$(echo -e "${YELLOW} WARNING: ${RESET}")/g" \
-        | sed "s/^WARNING\! /$(echo -e "${BOLD}${RED} WARNING! ${RESET}")/g" \
+        | sed "s/^LINK\: /$(echo "$(green)    LINK: $(reset)")/g" \
+        | sed "s/^UNLINK\: /$(echo "$(small;green)  UNLINK: $(reset)")/g" \
+        | sed "s/^WARNING\: /$(echo "$(yellow) WARNING: $(reset)")/g" \
+        | sed "s/^WARNING\! /$(echo "$(bold;red) WARNING! $(reset)")/g" \
         >"$TEMP_FILE"
     )
     $(
@@ -82,34 +96,11 @@ function stow {
     return 0;
 }
 
-function center() {
-    local pad_char="$1"
-    local s="$3"
-    local str_no_color=$(echo -e "$s" | sed 's/\x1b\[[0-9;]*[mGKH]//g')
-    local width="${2:-80}"
-    local str_len=${#str_no_color}
-
-    if (( width <= str_len )); then
-        printf '%s\n' "$s"
-        return
-    fi
-
-    local pad_total=$((width - str_len))
-    local pad_left=$((pad_total / 2))
-    local pad_right=$((pad_total - pad_left))
-
-    printf '%*s' "$pad_left" '' | tr ' ' "$pad_char"
-    printf '%b' "$s"
-    printf '%*s\n' "$pad_right" '' | tr ' ' "$pad_char"
-}
-
 # ==================== Implementation ====================
 
 # Function to backup directories
 function backup_files() {
     local files=($(sed 's/ /\n/g' <(echo "$1")))
-
-    local simulate="$2"
 
     local backup_root="backups"
 
@@ -121,8 +112,8 @@ function backup_files() {
         target_path="$HOME/$target"
         
         if [[ -f "$target_path" && ! -L "$target_path" ]]; then
-            if [[ $simulate == "--simulate" ]]; then
-                echo -e "${YELLOW}Backing up file: $target_path${RESET}"
+            if [[ $SIMULATE == true ]]; then
+                echo "$(yellow)Backing up file: $target_path$(reset)"
             else
                 echo "Backing up file: $target_path"
                 # Use the full path from home directory for backup structure
@@ -130,53 +121,51 @@ function backup_files() {
                 local backup_path="$backup_root/$(dirname "$rel_path")"
                 mkdir -p "$backup_path"
                 mv "$target_path" "$backup_path/"
-                # echo -e "\t$target -> $backup_root/$target"
+                # echo "\t$target -> $backup_root/$target"
             fi
         fi
     done
 }
 
+function install_dir() {
+    local dir="$1"
+    
+    center '-' 40 " $(cyan;bold)$dir$(reset) ";
+        
+    if [[ -f "$(dir)/install" ]]; then
+        pushd "$dir" > /dev/null
+        source ./install "$@"
+        popd > /dev/null
+    fi
+
+
+    stow "$dir"
+
+    case "$?" in
+        0)  ;;
+        1)  echo "$(bold;red)Install failed$(reset)" ;;
+        2)
+            local conflicts=$(rg 'existing target is neither a link nor a directory: (\S*)' -or '$1' "$TEMP_FILE" | sort | uniq )
+            echo "$(bold)Install Conflicts:$(reset)"
+            echo "$(small)    backing up...$(reset)"
+            for c in $conflicts; do echo -e "\t$(small)~/$c$(reset)"; done
+            backup_files "$conflicts"
+            if ! stow "$dir" && [[ $SIMULATE == false ]]; then exit -1; fi
+            ;;
+    esac
+}
+
 function main() {
     check_cmds stow rg
 
-    local simulate=""
-    if [[ " $* " == *"--simulate"* ]]; then
-        simulate="--simulate"
-    fi
-
-    echo -e "${BOLD}Installing Dotfiles...${RESET}"
+    [[ $SIMULATE == true ]] \
+        && echo "$(yellow;bold)Installing Dotfiles... (Simulating)$(reset)" \
+        || echo "$(bold)Installing Dotfiles...$(reset)"
 
     for d in "${DIRS[@]}"; do
         local dir="${d%/}"
-        # Skip ignored directories
-        [[ " ${IGNORE_DIRS[@]} " =~ " $dir " ]] && continue;
 
-        center '-' 40 " ${CYAN}${BOLD}$dir${RESET} ";
-        
-        if [[ -f "${dir}/install" ]]; then
-            pushd "$dir" > /dev/null
-            source ./install "$@"
-            popd > /dev/null
-        fi
-
-
-        stow $@ "$dir"
-
-        case "$?" in
-            0)  ;;
-            1)  echo -e "${BOLD}${RED}Stow failed for $dir${RESET}"
-                cat "$TEMP_FILE" 
-                ;;
-            2)
-                local conflicts=$(rg 'existing target is neither a link nor a directory: (\S*)' -or '$1' "$TEMP_FILE" | sort | uniq )
-                echo -e "${BOLD}Install Conflicts:${RESET}"
-                echo -e "${SMALL}    backing up...${RESET}"
-                for c in $conflicts; do echo -e "\t${SMALL}~/$c${RESET}"; done
-                backup_files "$conflict_files" "$simulate"
-                if ! stow "$@" "$dir" && [ $simulate == "" ]; then exit -1; fi
-                ;;
-        esac
-        
+        install_dir "$dir"
     done
 }
 

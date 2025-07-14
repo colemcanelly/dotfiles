@@ -10,4 +10,4 @@ if ! make -q >/dev/null; then
     fi
 fi
 
-echo -e "${SMALL}  ...done${RESET}"
+echo "$(small)  ...done$(reset)"
