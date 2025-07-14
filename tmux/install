@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+function check_installed() {
+    local path="$1"
+    
+    if [[ ! -s "$path" ]]; then
+        return -1
+    fi
+    return 0
+}
+
+completion_path=".local/share/bash-completion/completions/tmux"
+echo -en " bash-completions"
+mkdir -p "$(dirname "$completion_path")"
+
+if ! check_installed "$completion_path"; then
+    # https://github.com/imomaliev/tmux-bash-completion
+    curl -fSsL "https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux" > "$completion_path"
+fi
+
+echo "$(small)  ...done$(reset)"
+unset completion_path
