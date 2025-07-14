@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+function check_installed() {
+    local path="$1"
+    if ! [[ -L "$path" ]]; then
+        return -1;
+    fi
+    return 0
+}
+
+path=".local/bin/git-fuzzy"
+echo -en " git-fuzzy"
+
+if ! check_installed "$path"; then
+    ln -s $(realpath "./git-fuzzy/bin/git-fuzzy") "$path"
+fi
+
+echo "$(small)  ...done$(reset)"
+unset path
