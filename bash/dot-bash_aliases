@@ -11,6 +11,7 @@
 #   -R      recursive
 #   -1      One per line
 
+# ls aliases
 alias eza='eza --group-directories-first'
 
 alias tree='eza -T --icons=always -I ".git|node_modules|__pycache__|.venv|.idea|.vscode|.DS_Store"'
@@ -38,3 +39,6 @@ alias getclip="xclip -selection c -o"
 
 # Fix for stow bug
 alias stow="stow $@ 2> >(grep -v 'BUG in find_stowed_path? Absolute/relative mismatch' 1>&2)"
+
+# Cursor alias
+alias curse=$(command -v cursor)

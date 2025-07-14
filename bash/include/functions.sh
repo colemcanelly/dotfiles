@@ -1,23 +1,25 @@
 function extract () {
-    if [ -f $1 ] ; then
-        case $1 in
-            *.tar.bz2)  tar xjf $1      ;;
-            *.tar.gz)   tar xzf $1      ;;
-            *.bz2)      bunzip2 $1      ;;
-            *.rar)      rar x $1        ;;
-            *.gz)       gunzip $1       ;;
-            *.tar)      tar xf $1       ;;
-            *.tbz2)     tar xjf $1      ;;
-            *.tgz)      tar xzf $1      ;;
-            *.zip)      unzip $1        ;;
-            *.Z)        uncompress $1   ;;
+    if [ -f "$1" ] ; then
+        local target_dir="${2:-.}" # Default to the current directory if no second argument is provided
+        echo "Extracting '$1' to '$target_dir'"
+        mkdir -p "$target_dir"
+        case "$1" in
+            *.tar.bz2)  tar xjf "$1" -C "$target_dir" ;;
+            *.tar.gz)   tar xzf "$1" -C "$target_dir" ;;
+            *.bz2)      bunzip2 -c "$1" > "$target_dir/${1%.bz2}" ;;
+            *.rar)      rar x "$1" "$target_dir" ;;
+            *.gz)       gunzip -c "$1" > "$target_dir/${1%.gz}" ;;
+            *.tar)      tar xf "$1" -C "$target_dir" ;;
+            *.tbz2)     tar xjf "$1" -C "$target_dir" ;;
+            *.tgz)      tar xzf "$1" -C "$target_dir" ;;
+            *.zip)      unzip "$1" -d "$target_dir" ;;
+            *.Z)        uncompress -c "$1" > "$target_dir/${1%.Z}" ;;
             *)          echo "'$1' cannot be extracted via extract()" ;;
         esac
     else
         echo "'$1' is not a valid file"
     fi
 }
-
 # fromhex A52A2A
 # fromhex "#A52A2A"
 # BLUE_VIOLET=$(fromhex "#8A2BE2")

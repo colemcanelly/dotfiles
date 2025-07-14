@@ -7,8 +7,9 @@
  else
     neofetch
  fi
+
 # Case-Insensitive Auto Completion
  bind "set completion-ignore-case on" 
 
-
 eval "$(batman --export-env)"
+

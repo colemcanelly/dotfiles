@@ -68,4 +68,4 @@ __myps1() {
 # Uncomment for testing:
 # __myps1;
 
-PS1="$(__myps1)"; export PS1;
+PS1="$(__myps1)";
