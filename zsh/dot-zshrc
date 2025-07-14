@@ -1,0 +1,25 @@
+# Lines configured by zsh-newuser-install
+HISTFILE=~/.histfile
+HISTSIZE=1000
+SAVEHIST=2000
+setopt autocd extendedglob nomatch notify
+unsetopt beep
+bindkey -e
+# End of lines configured by zsh-newuser-install
+# The following lines were added by compinstall
+zstyle :compinstall filename '/home/cole/.zshrc'
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+
+# ==================== Custom ====================
+
+
+setopt histignorealldups sharehistory
+
+# Load configuration files
+source ~/.config/lib.zsh
+
+# My prompt
+eval "$(starship init zsh)"
