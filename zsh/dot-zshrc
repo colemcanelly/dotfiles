@@ -14,9 +14,10 @@ compinit
 # End of lines added by compinstall
 
 # ==================== Custom ====================
+bindkey "^[[1;5C" emacs-forward-word
+bindkey "^[[1;5D" emacs-backward-word
 
-
-setopt histignorealldups sharehistory
+setopt histignorealldups sharehistory interactive_comments
 
 # Load configuration files
 source ~/.config/lib.zsh
