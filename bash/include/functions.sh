@@ -4,17 +4,19 @@ function extract () {
         echo "Extracting '$1' to '$target_dir'"
         mkdir -p "$target_dir"
         case "$1" in
-            *.tar.bz2)  tar xjf "$1" -C "$target_dir" ;;
-            *.tar.gz)   tar xzf "$1" -C "$target_dir" ;;
-            *.bz2)      bunzip2 -c "$1" > "$target_dir/${1%.bz2}" ;;
-            *.rar)      rar x "$1" "$target_dir" ;;
-            *.gz)       gunzip -c "$1" > "$target_dir/${1%.gz}" ;;
-            *.tar)      tar xf "$1" -C "$target_dir" ;;
-            *.tbz2)     tar xjf "$1" -C "$target_dir" ;;
-            *.tgz)      tar xzf "$1" -C "$target_dir" ;;
-            *.zip)      unzip "$1" -d "$target_dir" ;;
-            *.Z)        uncompress -c "$1" > "$target_dir/${1%.Z}" ;;
-            *)          echo "'$1' cannot be extracted via extract()" ;;
+            *.tar.bz2|*.tbz2) tar -xvjf "$1" -C "$target_dir" ;;
+            *.tar.xz)         tar -xvJf "$1" -C "$target_dir" ;;
+            *.tar.gz|*.tgz)   tar -xvzf "$1" -C "$target_dir" ;;
+            *.bz2)            bunzip2 -c "$1" > "$target_dir/${1%.bz2}" ;;
+            *.rar)            rar -x "$1" "$target_dir" ;;
+            *.gz)             gunzip -c "$1" > "$target_dir/${1%.gz}" ;;
+            *.tar)            tar -xvf "$1" -C "$target_dir" ;;
+            *.zip)            unzip "$1" -d "$target_dir" ;;
+            *.Z)              uncompress -c "$1" > "$target_dir/${1%.Z}" ;;
+            *.xz)             xz -d "$1" ;;
+            *.7z)             7z -x "$1" ;;
+            *.a)              ar -x "$1" ;;
+            *)                echo "'$1' cannot be extracted via extract()" ;;
         esac
     else
         echo "'$1' is not a valid file"
@@ -25,13 +27,14 @@ function extract () {
 # BLUE_VIOLET=$(fromhex "#8A2BE2")
 # http://unix.stackexchange.com/a/269085/67282
 function fromhex() {
-    hex=$1
-    if [[ $hex == "#"* ]]; then
-        hex=$(echo $1 | awk '{print substr($0,2)}')
+    if [[ -z "$1" ]]; then
+        echo "Usage: fromhex <hex_color>"
+        return 1
     fi
-    r=$(printf '0x%0.2s' "$hex")
-    g=$(printf '0x%0.2s' ${hex#??})
-    b=$(printf '0x%0.2s' ${hex#????})
+    local hex="${1#'#'}"
+    local r=$(printf '0x%0.2s' "$hex")
+    local g=$(printf '0x%0.2s' ${hex#??})
+    local b=$(printf '0x%0.2s' ${hex#????})
     echo -e `printf "%03d" "$(((r<75?0:(r-35)/40)*6*6+(g<75?0:(g-35)/40)*6+(b<75?0:(b-35)/40)+16))"`
 }
 
