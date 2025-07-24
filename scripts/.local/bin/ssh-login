@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # Custom: Run SSH Agent upon every launch
 env=~/.ssh/agent.env
