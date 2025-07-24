@@ -32,7 +32,7 @@ for arg in "$@"; do
         exit 1
         ;;
     *) 
-        if [[ " $(echo */) " =~ " $arg/ "  ]]; then
+        if [[ " $(echo */) " =~ " ${arg%/}/ "  ]]; then
             tool_args+=("$arg") 
         else
             echo "Error: Invalid argument $arg" >&2;
