@@ -132,7 +132,7 @@ function install_dir() {
     
     center '-' 40 " $(cyan;bold)$dir$(reset) ";
         
-    if [[ -f "$(dir)/install" ]]; then
+    if [[ -f "${dir}/install" ]]; then
         pushd "$dir" > /dev/null
         source ./install "$@"
         popd > /dev/null

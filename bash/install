@@ -6,7 +6,7 @@ IFS=$'\n';
 INCLUDE=(
     "shopt -s extglob"
     "# dotfiles"
-    source ~/.local/lib/ssh-login
+    "source ~/.local/lib/ssh-login"
     $(realpath ./include/* | xargs -I@ echo "source @")
     "# dotfiles end"
 )
