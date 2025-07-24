@@ -1,8 +1,6 @@
 # Source our bashrc if it exists
  [[ -f ~/.bashrc ]] && source ~/.bashrc
 
-# Login to SSH
- ssh-login
 
 # Display neofetch if installed
  if ! command -v neofetch 2>&1 >/dev/null

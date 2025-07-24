@@ -20,7 +20,10 @@ bindkey "^[[1;5D" emacs-backward-word
 setopt histignorealldups sharehistory interactive_comments
 
 # Load configuration files
-source ~/.config/lib.zsh
+source ~/.config/zsh/lib.zsh
+
+# Login to ssh
+source ~/.local/lib/ssh-login
 
 # My prompt
 eval "$(starship init zsh)"
