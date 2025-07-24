@@ -10,3 +10,6 @@
 [submodule "scripts/git-fuzzy"]
 	path = scripts/git-fuzzy
 	url = git@github.com:bigH/git-fuzzy.git
+[submodule "zsh/.config/zsh/plugins/nx-completion"]
+	path = zsh/.config/zsh/plugins/nx-completion
+	url = git@github.com:jscutlery/nx-completion.git
