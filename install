@@ -27,16 +27,12 @@ for arg in "$@"; do
         ;;
     -R|--restow) RESTOW=true ;;
     -s|--simulate) SIMULATE=true ;;
-    -*|--*)
-        echo "Error: Unsupported flag $1" >&2
-        exit 1
-        ;;
+    -*|--*) panic "Error: Unsupported flag $arg" ;;
     *) 
         if [[ " $(echo */) " =~ " ${arg%/}/ "  ]]; then
             tool_args+=("$arg") 
         else
-            echo "Error: Invalid argument $arg" >&2;
-            exit 1 
+            panic "Error: Invalid argument $arg";
         fi ;;
     esac
 done
@@ -47,10 +43,6 @@ DIRS=($(
     && echo "${tool_args[@]}"    \
     || echo !(include|backups|test)/
 ))
-
-# ==================== CONFIG ====================
-# Create temp file for use, and set cleanup on script exit
-TEMP_FILE=$(mktemp) ; trap 'rm -f "$TEMP_FILE"' EXIT
 
 # ==================== UTILS ====================
 
@@ -69,46 +61,31 @@ function log() {
     fi
 }
 
-# Fix for stow bug
-# Apply colors to stow output
-function stow {\
-    local opts="-t$HOME -v  --dotfiles --ignore=install"
-    [[ $SIMULATE == true ]] && opts+=" --simulate";
-    [[ $RESTOW == true ]] && opts+=" --restow";
-
-    command stow $opts "$@" 2> >(
-        sed '/BUG in find_stowed_path?/d' \
-        | sed 's/=>/->/g' \
-        | sed "s/^LINK\: /$(echo "$(green)    LINK: $(reset)")/g" \
-        | sed "s/^UNLINK\: /$(echo "$(small;green)  UNLINK: $(reset)")/g" \
-        | sed "s/^WARNING\: /$(echo "$(yellow) WARNING: $(reset)")/g" \
-        | sed "s/^WARNING\! /$(echo "$(bold;red) WARNING! $(reset)")/g" \
-        >"$TEMP_FILE"
-    )
-    $(
-        cat "$TEMP_FILE" \
-        | sed 's/\x1b\[[0-9;]*[mGKH]//g' \
-        | rg -q 'WARNING! stowing \w* would cause conflicts'
-    ) && return 2;
-    
-    cat "$TEMP_FILE";
-    [[ $? -ne 0 ]] && return 1;
-    return 0;
+# Read from stdin and format output to stdout with colors
+function format_stow_output() {
+    sed '/BUG in find_stowed_path?/d' \
+    | sed 's/=>/->/g' \
+    | sed "s/^LINK\: /$(green)    LINK: $(reset)/g" \
+    | sed "s/^UNLINK\: /$(small;green)  UNLINK: $(reset)/g" \
+    | sed "s/^WARNING\: /$(yellow) WARNING: $(reset)/g" \
+    | sed "s/^WARNING\! /$(bold;red) WARNING! $(reset)/g"
 }
 
 # ==================== Implementation ====================
 
 # Function to backup directories
-function backup_files() {
-    local files=($(sed 's/ /\n/g' <(echo "$1")))
+# Will read from stdin to get stow output, grep for conflicts, and handle them
+function handle_conflicts() {
+    local conflicts=($(rg 'neither a link nor a directory: (\S*)' -or '$1' | sort | uniq))
+    echo "$(bold)Install Conflicts:$(reset)"
+    echo "$(small)    backing up...$(reset)"
+    printf "\t$(small)~/%s$(reset)\n" "${conflicts[@]}" 
 
     local backup_root="backups"
-
     mkdir -p "$backup_root"
-    
+
     # Process each conflicting file
-    for target in "${files[@]}"; do
-        target=$(echo "$target" | sed 's/\x1b\[[0-9;]*[mGKH]//g')
+    for target in "${conflicts[@]}"; do
         target_path="$HOME/$target"
         
         if [[ -f "$target_path" && ! -L "$target_path" ]]; then
@@ -127,6 +104,28 @@ function backup_files() {
     done
 }
 
+# Adds error code handling for our installation script
+function stow() {
+    local opts="-t$HOME -v  --dotfiles --ignore=install"
+    [[ $SIMULATE == true ]] && opts+=" --simulate";
+    [[ $RESTOW == true ]] && opts+=" --restow";
+
+    local out="$(command stow $opts "$@" 2>&1)"
+    local exit_code=$?
+
+    if rg -q 'WARNING! stowing \w* would cause conflicts' <<< "$out"; then
+        handle_conflicts <<< "$out"
+        [[ $SIMULATE == true ]] && return 0;
+        out="$(command stow $opts "$@" 2>&1)"
+        exit_code=$?
+    fi
+
+    format_stow_output <<< "$out"
+    [[ $exit_code -ne 0 ]] && return 1;
+    return 0;
+}
+
+
 function install_dir() {
     local dir="$1"
     
@@ -138,21 +137,9 @@ function install_dir() {
         popd > /dev/null
     fi
 
+    stow $dir
 
-    stow "$dir"
-
-    case "$?" in
-        0)  ;;
-        1)  echo "$(bold;red)Install failed$(reset)" ;;
-        2)
-            local conflicts=$(rg 'existing target is neither a link nor a directory: (\S*)' -or '$1' "$TEMP_FILE" | sort | uniq )
-            echo "$(bold)Install Conflicts:$(reset)"
-            echo "$(small)    backing up...$(reset)"
-            for c in $conflicts; do echo -e "\t$(small)~/$c$(reset)"; done
-            backup_files "$conflicts"
-            if ! stow "$dir" && [[ $SIMULATE == false ]]; then exit -1; fi
-            ;;
-    esac
+    if [[ $? -ne 0 ]]; then panic "$(bold;red)Install failed$(reset)"; fi
 }
 
 function main() {
