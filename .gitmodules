@@ -13,3 +13,6 @@
 [submodule "zsh/.config/zsh/plugins/nx-completion"]
 	path = zsh/.config/zsh/plugins/nx-completion
 	url = git@github.com:jscutlery/nx-completion.git
+[submodule "zsh/.config/zsh/plugins/zsh-syntax-highlighting"]
+	path = zsh/.config/zsh/plugins/zsh-syntax-highlighting
+	url = https://github.com/zsh-users/zsh-syntax-highlighting.git

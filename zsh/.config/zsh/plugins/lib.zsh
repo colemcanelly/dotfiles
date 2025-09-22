@@ -1,8 +1,9 @@
 
-BASE_PATH=~/.config/zsh/plugins/
+BASE_PATH=~/.config/zsh/plugins
 
 plugins=(
-    nx-completion/nx-completion.plugin.zsh
+    /nx-completion/nx-completion.plugin.zsh
+    /zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 )
 
 
