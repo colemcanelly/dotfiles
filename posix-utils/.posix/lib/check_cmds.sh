@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+source ~/.posix/lib/panic.sh
 
 function check_cmds() { 
     for cmd in "$@"; do

@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-
+source ~/.posix/lib/colors.sh
 
 function panic() {
 	echo "$(small)[panic]$(reset)" "$@" >&2

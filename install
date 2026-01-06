@@ -1,74 +1,55 @@
 #!/usr/bin/env bash
 shopt -s extglob
 
-# ==================== INCLUDES ====================
-for f in $(dirname "$0")/include/*.sh; do source $f; done
+# ==================== CUR DIR ====================
+dir=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+pushd "$dir" > /dev/null
 
-# ==================== USAGE ====================
-USAGE=$(cat << EOF
-Usage: $0 [options] [tool1 tool2 ...]
-$(bold;underline)Options:$(reset)
-  $(bold)-s, --simulate$(reset)    Simulate the installation without making changes
-  $(bold)-R, --restow$(reset)      Restow all directories, even if they are already stowed
-  $(bold)-h, --help$(reset)        Show this help message
-EOF
-)
-
+# ==================== GLOBALS ====================
 SIMULATE=false
 RESTOW=false
 tool_args=()
+NAME="${0}"
+VERSION="1.0"
 
-# Parse options and collect tool names
-for arg in "$@"; do
-    case "$arg" in
-    -h|--help)
-        echo "$USAGE";
-        exit 0
-        ;;
-    -R|--restow) RESTOW=true ;;
-    -s|--simulate) SIMULATE=true ;;
-    -*|--*) panic "Error: Unsupported flag $arg" ;;
-    *) 
-        if [[ " $(echo */) " =~ " ${arg%/}/ "  ]]; then
-            tool_args+=("$arg") 
-        else
-            panic "Error: Invalid argument $arg";
-        fi ;;
-    esac
-done
+# ==================== INCLUDES ====================
+for f in ./posix-utils/.posix/lib/*.sh; do source $f; done
+for f in ./include/*.sh; do source $f; done
+
+# ==================== USAGE ====================
 
 # Set DIRS to tool_args if any, else to all directories
 DIRS=($(
-    [[ ${#tool_args[@]} -gt 0 ]] \
-    && echo "${tool_args[@]}"    \
-    || echo !(include|backups|test)/
+	[[ ${#tool_args[@]} -gt 0 ]] \
+	&& echo "${tool_args[@]}"   \
+	|| echo !(include|backups|test)/
 ))
 
 # ==================== UTILS ====================
 
 function log() {
-    local original_args=("$@")
-    [[ "$1" == "echo" ]] && shift;
+	local original_args=("$@")
+	[[ "$1" == "echo" ]] && shift;
 
-    printf "   "
-    if [[ $SIMULATE == true ]]; then
-        echo -n "$(yellow)$@$(reset)"
-        return -1
-    else
-        echo "$@"
-        ${original_args[@]} >/dev/null
-        return 0
-    fi
+	printf "   "
+	if [[ $SIMULATE == true ]]; then
+		echo -n "$(yellow)$@$(reset)"
+		return -1
+	else
+		echo "$@"
+		${original_args[@]} >/dev/null
+		return 0
+	fi
 }
 
 # Read from stdin and format output to stdout with colors
 function format_stow_output() {
-    sed '/BUG in find_stowed_path?/d' \
-    | sed 's/=>/->/g' \
-    | sed "s/^LINK\: /$(green)    LINK: $(reset)/g" \
-    | sed "s/^UNLINK\: /$(small;green)  UNLINK: $(reset)/g" \
-    | sed "s/^WARNING\: /$(yellow) WARNING: $(reset)/g" \
-    | sed "s/^WARNING\! /$(bold;red) WARNING! $(reset)/g"
+	sed '/BUG in find_stowed_path?/d' \
+	| sed 's/=>/->/g' \
+	| sed "s/^LINK\: /$(green)  LINK: $(reset)/g" \
+	| sed "s/^UNLINK\: /$(small;green)  UNLINK: $(reset)/g" \
+	| sed "s/^WARNING\: /$(yellow) WARNING: $(reset)/g" \
+	| sed "s/^WARNING\! /$(bold;red) WARNING! $(reset)/g"
 }
 
 # ==================== Implementation ====================
@@ -76,85 +57,85 @@ function format_stow_output() {
 # Function to backup directories
 # Will read from stdin to get stow output, grep for conflicts, and handle them
 function handle_conflicts() {
-    local conflicts=($(rg 'neither a link nor a directory: (\S*)' -or '$1' | sort | uniq))
-    echo "$(bold)Install Conflicts:$(reset)"
-    echo "$(small)    backing up...$(reset)"
-    printf "\t$(small)~/%s$(reset)\n" "${conflicts[@]}" 
+	local conflicts=($(rg 'neither a link nor a directory: (\S*)' -or '$1' | sort | uniq))
+	echo "$(bold)Install Conflicts:$(reset)"
+	echo "$(small)  backing up...$(reset)"
+	printf "\t$(small)~/%s$(reset)\n" "${conflicts[@]}" 
 
-    local backup_root="backups"
-    mkdir -p "$backup_root"
+	local backup_root="backups"
+	mkdir -p "$backup_root"
 
-    # Process each conflicting file
-    for target in "${conflicts[@]}"; do
-        target_path="$HOME/$target"
-        
-        if [[ -f "$target_path" && ! -L "$target_path" ]]; then
-            if [[ $SIMULATE == true ]]; then
-                echo "$(yellow)Backing up file: $target_path$(reset)"
-            else
-                echo "Backing up file: $target_path"
-                # Use the full path from home directory for backup structure
-                local rel_path="${target#$HOME/}"
-                local backup_path="$backup_root/$(dirname "$rel_path")"
-                mkdir -p "$backup_path"
-                mv "$target_path" "$backup_path/"
-                # echo "\t$target -> $backup_root/$target"
-            fi
-        fi
-    done
+	# Process each conflicting file
+	for target in "${conflicts[@]}"; do
+		target_path="$HOME/$target"
+		
+		if [[ -f "$target_path" && ! -L "$target_path" ]]; then
+			if [[ $SIMULATE == true ]]; then
+				echo "$(yellow)Backing up file: $target_path$(reset)"
+			else
+				echo "Backing up file: $target_path"
+				# Use the full path from home directory for backup structure
+				local rel_path="${target#$HOME/}"
+				local backup_path="$backup_root/$(dirname "$rel_path")"
+				mkdir -p "$backup_path"
+				mv "$target_path" "$backup_path/"
+				# echo "\t$target -> $backup_root/$target"
+			fi
+		fi
+	done
 }
 
 # Adds error code handling for our installation script
 function stow() {
-    local opts="-t$HOME -v  --dotfiles --ignore=install"
-    [[ $SIMULATE == true ]] && opts+=" --simulate";
-    [[ $RESTOW == true ]] && opts+=" --restow";
+	local opts="-t$HOME -v  --dotfiles --ignore=install|\.gitignore"
+	[[ $SIMULATE == true ]] && opts+=" --simulate";
+	[[ $RESTOW == true ]] && opts+=" --restow";
 
-    local out="$(command stow $opts "$@" 2>&1)"
-    local exit_code=$?
+	local out="$(command stow $opts "$@" 2>&1)"
+	local exit_code=$?
 
-    if rg -q 'WARNING! stowing \w* would cause conflicts' <<< "$out"; then
-        handle_conflicts <<< "$out"
-        [[ $SIMULATE == true ]] && return 0;
-        out="$(command stow $opts "$@" 2>&1)"
-        exit_code=$?
-    fi
+	if rg -q 'WARNING! stowing \w* would cause conflicts' <<< "$out"; then
+		handle_conflicts <<< "$out"
+		[[ $SIMULATE == true ]] && return 0;
+		out="$(command stow $opts "$@" 2>&1)"
+		exit_code=$?
+	fi
 
-    format_stow_output <<< "$out"
-    [[ $exit_code -ne 0 ]] && return 1;
-    return 0;
+	format_stow_output <<< "$out"
+	[[ $exit_code -ne 0 ]] && return 1;
+	return 0;
 }
 
 
 function install_dir() {
-    local dir="$1"
-    
-    center '-' 40 " $(cyan;bold)$dir$(reset) ";
-        
-    if [[ -f "${dir}/install" ]]; then
-        pushd "$dir" > /dev/null
-        source ./install "$@"
-        popd > /dev/null
-    fi
+	local dir="$1"
+		
+	center '-' 40 " $(cyan;bold)$dir$(reset) ";
+		
+	if [[ -f "${dir}/install" ]]; then
+		pushd "$dir" > /dev/null
+		source ./install "$@"
+		popd > /dev/null
+	fi
 
-    stow $dir
+	stow $dir
 
-    if [[ $? -ne 0 ]]; then panic "$(bold;red)Install failed$(reset)"; fi
+	if [[ $? -ne 0 ]]; then panic "$(bold;red)Install failed$(reset)"; fi
 }
 
 function main() {
-    check_cmds stow rg
+	check_cmds stow rg
 
-    [[ $SIMULATE == true ]] \
-        && echo "$(yellow;bold)Installing Dotfiles... (Simulating)$(reset)" \
-        || echo "$(bold)Installing Dotfiles...$(reset)"
+	[[ $SIMULATE == true ]] \
+		&& echo "$(yellow;bold)Installing Dotfiles... (Simulating)$(reset)" \
+		|| echo "$(bold)Installing Dotfiles...$(reset)"
 
-    for d in "${DIRS[@]}"; do
-        local dir="${d%/}"
+	for d in "${DIRS[@]}"; do
+		local dir="${d%/}"
 
-        install_dir "$dir"
-    done
+		install_dir "$dir"
+	done
 }
 
-
 main "$@"
+popd > /dev/null

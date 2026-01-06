@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 
 function center() {
     local pad_char="$1"

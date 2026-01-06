@@ -3,7 +3,6 @@ backups
 
 **/*.d
 **/*.o
-ansi-colors/.local/bin/colors
-scripts/.local/bin/git-fuzzy
+
 
 bash-completion
