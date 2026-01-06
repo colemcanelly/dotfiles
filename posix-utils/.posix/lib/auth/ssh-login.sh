@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 # Custom: Run SSH Agent upon every launch
-env=~/.ssh/agent.env
 
+env=~/.ssh/agent.env
 agent_load_env () {
-    test -f "$env" && source "$env" >| /dev/null;
+   [[ -f "$env" ]] && source "$env" >| /dev/null;
 }
 
 agent_start () {
     (umask 077; ssh-agent >| "$env")
-    source "$env" >| /dev/null ; 
+    agent_load_env;
 }
 
 agent_load_env
