@@ -20,7 +20,7 @@ setopt histignorealldups sharehistory interactive_comments
 source ~/.config/zsh/lib.zsh
 
 # Login to ssh
-source ~/.local/lib/ssh-login
+source ~/.posix/lib/auth/ssh-login.sh
 
 # My prompt
 eval "$(starship init zsh)"

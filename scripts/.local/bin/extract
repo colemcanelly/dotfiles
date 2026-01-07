@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+source ~/.posix/lib/errors.sh
+
+
+usage() {
+	msg=$(cat <<-EOF
+	Extracts various types of archive files.
+
+		Usage: extract <archive> [target_directory]
+
+		Arguments:
+		  archive           The archive file to extract
+		  target_directory  (Optional) The directory to extract files into (default: current directory)
+
+		Options:
+		  -h, --help        Show this help message
+
+		EOF
+	)
+	echo "$msg"
+	exit 0
+}
+
+function extract () {
+    [ "$#" -eq 0 ] && panic "No arguments supplied." >&2
+    [ -f "$1" ] || panic "'$1' is not a valid file"
+
+    local target_dir="${2:-.}" # Default to the current directory if no second argument is provided
+    echo "Extracting '$1' to '$target_dir'"
+    mkdir -p "$target_dir"
+    case "$1" in
+        *.tar.bz2|*.tbz2) tar -xvjf "$1" -C "$target_dir" ;;
+        *.tar.xz)         tar -xvJf "$1" -C "$target_dir" ;;
+        *.tar.gz|*.tgz)   tar -xvzf "$1" -C "$target_dir" ;;
+        *.tar)            tar -xvf "$1" -C "$target_dir" ;;
+        *.bz2)            bunzip2 -c "$1" > "$target_dir/${1%.bz2}" ;;
+        *.rar)            rar -x "$1" "$target_dir" ;;
+        *.gz)             gunzip -c "$1" > "$target_dir/${1%.gz}" ;;
+        *.zip)            unzip "$1" -d "$target_dir" ;;
+        *.Z)              uncompress -c "$1" > "$target_dir/${1%.Z}" ;;
+        *.xz)             xz -d "$1" ;;
+        *.7z)             7z -x "$1" ;;
+        *.a)              ar -x "$1" ;;
+        *)                panic "'$1' cannot be extracted via extract()" ;;
+    esac
+}
+
+while getopts ":h-:" opt; do
+  case $opt in
+    h) usage ;;
+    -) [[ $OPTARG == help ]] && usage ;;
+  esac
+done
+
+extract "$@"

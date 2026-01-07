@@ -1,0 +1,31 @@
+[user]
+	name = Cole McAnelly
+	email = cole.mcanelly@valentpartners.com
+	signingkey = /home/cole/.ssh/id_ed25519.pub
+[core]
+	editor = vim
+	pager = delta --color-only
+
+[init]
+	defaultBranch = main
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+[merge]
+	conflictStyle = zdiff3
+[diff]
+	algorithm = histogram
+[commit]
+	gpgsign = true
+[tag]
+	gpgSign = true
+[gpg]
+	format = ssh
+
+[alias]
+	find-merge = "!sh -c 'commit=$0 && branch=${1:-HEAD} && (git rev-list $commit..$branch --ancestry-path | cat -n; git rev-list $commit..$branch --first-parent | cat -n) | sort -k2 -s | uniq -f1 -d | sort -n | tail -1 | cut -f2'"
+	last = log -1 HEAD
+	delta = ! git diff | delta
+	choose = ! b=$(git branch --sort=-committerdate | grep -v "^\\*" | fzf --height=20% --reverse --info=inline) && [ -n \"$b\" ] && git switch $b
+	prune-branch = ! git branch -vv | rg 'origin/(.*): gone' -or '$1' | xargs -I{} git branch -d "$@" {}

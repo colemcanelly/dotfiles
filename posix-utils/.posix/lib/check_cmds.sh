@@ -1,8 +1,8 @@
-source ~/.posix/lib/panic.sh
+source ~/.posix/lib/errors.sh
 
-function check_cmds() { 
+function check_cmds() {
     for cmd in "$@"; do
         if command -v $cmd &> /dev/null; then continue; fi
-        panic "Error: $cmd is not installed."
+        throw "Error: $cmd is not installed."
     done
 };
