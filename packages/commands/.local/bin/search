@@ -1,5 +1,5 @@
  #!/usr/bin/env bash
-source ~/.posix/lib/check_cmds.sh
+source ~/.local/lib/check_cmds.sh
 
 # Check for required commands
 check_cmds rg fzf code bat

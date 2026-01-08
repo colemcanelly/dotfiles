@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ~/.posix/lib/errors.sh
+source ~/.local/lib/errors.sh
 
 
 usage() {

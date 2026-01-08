@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 dots_cmd() {
-	local install_cmd="$(realpath "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/..")/install"
+	local install_cmd="${ROOT_DIR}/install"
 	local f=".local/bin/dots"
 
 	[[ -f $f ]] && rm $f
-	
+
 	touch $f
 	cat >$f <<-EOF
 		#!/usr/bin/env bash
@@ -17,18 +17,14 @@ dots_cmd() {
 
 function check_installed() {
     local path="$1"
-    if ! [[ -L "$path" ]]; then
-        return -1;
-    fi
+    [[ -f "$path" ]] || return -1;
     return 0
 }
 
 path=".local/bin/git-fuzzy"
 echo -en " git-fuzzy"
 
-if ! check_installed "$path"; then
-    ln -s $(realpath "./git-fuzzy/bin/git-fuzzy") "$path"
-fi
+check_installed "$path" || cp $(realpath "./git-fuzzy/bin/git-fuzzy") "$path"
 
 echo "$(small)  ...done$(reset)"
 unset path

@@ -4,10 +4,9 @@ FILE="${HOME}/.bashrc"
 
 IFS=$'\n';
 INCLUDE=(
-    "shopt -s extglob"
     "# dotfiles"
-    "source ~/.posix/lib/auth/ssh-login.sh"
-    $(realpath ./include/* | xargs -I@ echo "source @")
+    "shopt -s extglob"
+    "source $(realpath ./include/lib.sh )"
     "# dotfiles end"
 )
 IFS=$' \t\n';

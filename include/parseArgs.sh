@@ -1,4 +1,8 @@
 
+
+shopt -s extglob
+
+
 usage() {
 	msg=$(cat <<-EOF
 		Installs dotfiles to home directory using GNU Stow.
@@ -21,44 +25,52 @@ usage() {
 
 
 list() {
-    ls -d !(include|backups|test)/ | sed 's/\/$//g'
+    command ls -1 $ROOT_DIR/packages/
 }
 
 
-# Parse options and collect tool names
-while [[ $# -gt 0 ]]; do
-	arg="$1"
-	case "$arg" in
-	-v|--version)
-		printf "${NAME} - Install dotfiles using GNU Stow\nv${VERSION}\n"
-		exit 0
-		;;
-	-h|--help)
-		usage $NAME
-		exit 0
-		;;
-	-l|--list)
-        list
-        exit 0
-        ;;
-	--name)
-		shift
-		NAME="$1"
-		shift
-		;;
-	--name=*)
-		shift
-		NAME="${arg#*=}"
-		;;
-	-R|--restow) shift; RESTOW=true ;;
-	-s|--simulate) shift; SIMULATE=true ;;
-	-*|--*) panic "Error: Unsupported flag $arg" ;;
-	*)
-		if [[ " $(echo */) " =~ " ${arg%/}/ "  ]]; then
-			shift
-			tool_args+=("${arg}")
-		else
-			panic "Error: Invalid argument $arg";
-		fi ;;
-	esac
-done
+parseArgs() {
+    local tool_args=();
+    local default_dirs=($(list));
+    local name="${0}"
+
+    # Parse options and collect tool names
+    while [[ $# -gt 0 ]]; do
+    	arg="$1"
+    	case "$arg" in
+    	-v|--version)
+    		printf "${name} - Install dotfiles using GNU Stow\nv${VERSION}\n"
+    		exit 0
+    		;;
+    	-h|--help)
+    		usage $name
+    		exit 0
+    		;;
+    	-l|--list)
+            list
+            exit 0
+            ;;
+    	--name)
+    		shift
+    		name="$1"
+    		shift
+    		;;
+    	--name=*)
+    		shift
+    		name="${arg#*=}"
+    		;;
+    	-R|--restow) shift; RESTOW=true ;;
+    	-s|--simulate) shift; SIMULATE=true ;;
+    	-*|--*) panic "Error: Unsupported flag $arg" ;;
+    	*)
+    		if [[ " ${default_dirs[*]} " =~ " ${arg%/} "  ]]; then
+    			shift
+    			tool_args+=("${arg}")
+    		else
+    			panic "Error: Invalid argument $arg";
+    		fi ;;
+    	esac
+    done
+
+    DIRS=("${tool_args[@]:-"${default_dirs[@]}"}")
+}

@@ -1,5 +1,5 @@
-source ~/.posix/lib/colors.sh
-
+src_dir=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+source $src_dir/colors.sh
 
 # For use in shell-level functions
 #
@@ -18,3 +18,6 @@ function panic() {
 	echo "$(small)[panic]$(reset)" "$@" >&2
 	exit 1
 }
+
+
+unset src_dir
