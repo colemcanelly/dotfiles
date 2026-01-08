@@ -1,17 +1,17 @@
 [submodule "bat/bat-extras"]
-	path = bat/bat-extras
+	path = packages/bat/bat-extras
 	url = git@github.com:eth-p/bat-extras.git
 [submodule "eza/eza-themes"]
-	path = eza/eza-themes
+	path = packages/eza/eza-themes
 	url = git@github.com:eza-community/eza-themes.git
 [submodule "tmux/.tmux/plugins/tpm"]
-	path = tmux/.tmux/plugins/tpm
+	path = packages/tmux/.tmux/plugins/tpm
 	url = https://github.com/tmux-plugins/tpm
 [submodule "scripts/git-fuzzy"]
-	path = scripts/git-fuzzy
+	path = packages/commands/git-fuzzy
 	url = git@github.com:bigH/git-fuzzy.git
 [submodule "zsh/.config/zsh/plugins/nx-completion"]
-	path = zsh/.config/zsh/plugins/nx-completion
+	path = packages/zsh/.config/zsh/plugins/nx-completion
 	url = git@github.com:jscutlery/nx-completion.git
 [submodule "zsh/.config/zsh/plugins/zsh-syntax-highlighting"]
 	path = zsh/.config/zsh/plugins/zsh-syntax-highlighting
@@ -20,5 +20,5 @@
 	path = zsh/.config/zsh/plugins/f-sy-h
 	url = https://github.com/z-shell/F-Sy-H.git
 [submodule "zsh/.config/zsh/plugins/fast-syntax-highlighting"]
-	path = zsh/.config/zsh/plugins/fast-syntax-highlighting
+	path = packages/zsh/.config/zsh/plugins/fast-syntax-highlighting
 	url = git@github.com:zdharma-continuum/fast-syntax-highlighting.git
