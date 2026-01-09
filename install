@@ -73,6 +73,7 @@ function install_package() {
 }
 
 function main() {
+    type -a stow
     parseArgs "$@"
 	check_cmds stow rg
 

@@ -13,12 +13,6 @@
 [submodule "zsh/.config/zsh/plugins/nx-completion"]
 	path = packages/zsh/.config/zsh/plugins/nx-completion
 	url = git@github.com:jscutlery/nx-completion.git
-[submodule "zsh/.config/zsh/plugins/zsh-syntax-highlighting"]
-	path = zsh/.config/zsh/plugins/zsh-syntax-highlighting
-	url = https://github.com/zsh-users/zsh-syntax-highlighting.git
-[submodule "zsh/.config/zsh/plugins/f-sy-h"]
-	path = zsh/.config/zsh/plugins/f-sy-h
-	url = https://github.com/z-shell/F-Sy-H.git
 [submodule "zsh/.config/zsh/plugins/fast-syntax-highlighting"]
 	path = packages/zsh/.config/zsh/plugins/fast-syntax-highlighting
 	url = git@github.com:zdharma-continuum/fast-syntax-highlighting.git

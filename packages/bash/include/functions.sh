@@ -1,27 +1,4 @@
-function extract () {
-    if [ -f "$1" ] ; then
-        local target_dir="${2:-.}" # Default to the current directory if no second argument is provided
-        echo "Extracting '$1' to '$target_dir'"
-        mkdir -p "$target_dir"
-        case "$1" in
-            *.tar.bz2|*.tbz2) tar -xvjf "$1" -C "$target_dir" ;;
-            *.tar.xz)         tar -xvJf "$1" -C "$target_dir" ;;
-            *.tar.gz|*.tgz)   tar -xvzf "$1" -C "$target_dir" ;;
-            *.bz2)            bunzip2 -c "$1" > "$target_dir/${1%.bz2}" ;;
-            *.rar)            rar -x "$1" "$target_dir" ;;
-            *.gz)             gunzip -c "$1" > "$target_dir/${1%.gz}" ;;
-            *.tar)            tar -xvf "$1" -C "$target_dir" ;;
-            *.zip)            unzip "$1" -d "$target_dir" ;;
-            *.Z)              uncompress -c "$1" > "$target_dir/${1%.Z}" ;;
-            *.xz)             xz -d "$1" ;;
-            *.7z)             7z -x "$1" ;;
-            *.a)              ar -x "$1" ;;
-            *)                echo "'$1' cannot be extracted via extract()" ;;
-        esac
-    else
-        echo "'$1' is not a valid file"
-    fi
-}
+
 # fromhex A52A2A
 # fromhex "#A52A2A"
 # BLUE_VIOLET=$(fromhex "#8A2BE2")
@@ -39,8 +16,8 @@ function fromhex() {
 }
 
 # Overload to use sshpass with certain ssh targets
-function ssh () { 
-    case $1 in 
+function ssh () {
+    case $1 in
         465ctf) sshpass -f ~/csce465/ctfinfo/passwd.txt /usr/bin/ssh 465ctf;;
         465socks) echo "14741inictfsocks465!"; /usr/bin/ssh -f 465socks;;
         *) /usr/bin/ssh "$@";;
