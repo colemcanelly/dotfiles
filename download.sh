@@ -18,8 +18,8 @@ panic() {
 	exit 1
 }
 
-
-check_cmds git
+reqs=($(curl -fsS https://raw.githubusercontent.com/colemcanelly/dotfiles/refs/heads/master/requirements.txt))
+check_cmds git "${reqs[@]}"
 
 
 generate_ssh_key() {
