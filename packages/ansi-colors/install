@@ -1,7 +1,7 @@
 
 
 echo -en " ansi-colors"
-
+check_cmds make
 
 if ! make -q >/dev/null; then
     if ! [[ " $* " == *"--simulate"* ]]; then
