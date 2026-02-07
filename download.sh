@@ -7,7 +7,7 @@ check_cmds() {
 	local fail="false"
 	for cmd in "$@"; do
 		command -v $cmd &> /dev/null && continue;
-		printf '%: command not found\n' "$cmd"
+		printf '%\n' "$cmd: command not found"
 		fail="true"
 	done
 	$fail && exit 1
