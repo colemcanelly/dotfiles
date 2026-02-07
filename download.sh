@@ -44,7 +44,8 @@ verify_ssh_key() {
 }
 
 download() {
-	local loc="~/.config/.dotfiles"
+	local loc="$HOME/.config/.dotfiles"
+	test -d $loc && panic "Nothing to do"
 	mkdir -p $(dirname $loc)
 
 	local repo_https="https://github.com/colemcanelly/dotfiles.git"
@@ -54,7 +55,7 @@ download() {
 }
 
 setup_ssh() {
-	test -f ~/.ssh/id_ed25519 || generate_ssh_key
+	test -f $HOME/.ssh/id_ed25519 || generate_ssh_key
 	verify_ssh_key || exit 1
 
 	repo_ssh="git@github.com:colemcanelly/dotfiles.git"
@@ -71,3 +72,4 @@ main() {
 
 	echo "Setup complete! Your dotfiles have been installed and your SSH key is configured for GitHub."
 }
+main
