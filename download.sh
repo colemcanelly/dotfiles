@@ -5,12 +5,12 @@
 
 check_cmds() {
 	local fail="false"
-  for cmd in "$@"; do
-    command -v $cmd &> /dev/null && continue;
-    printf '%: command not found\n' "$cmd"
-    fail="true"
-  done
-  $fail && exit 1
+	for cmd in "$@"; do
+		command -v $cmd &> /dev/null && continue;
+		printf '%: command not found\n' "$cmd"
+		fail="true"
+	done
+	$fail && exit 1
 };
 
 panic() {
@@ -24,7 +24,6 @@ check_cmds git
 
 generate_ssh_key() {
 	echo "Generating SSH key..."
-	# get user email for ssh key
 	read -p "Enter your email for SSH key: " email
 	ssh-keygen -t ed25519 -C "$email"
 }
