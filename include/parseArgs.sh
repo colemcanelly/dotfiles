@@ -28,7 +28,6 @@ list() {
     command ls -1 $ROOT_DIR/packages/
 }
 
-
 parseArgs() {
     local tool_args=();
     local default_dirs=($(list));
@@ -36,7 +35,7 @@ parseArgs() {
 
     # Parse options and collect tool names
     while [[ $# -gt 0 ]]; do
-    	arg="$1"
+    	local arg="$1"
     	case "$arg" in
     	-v|--version)
     		printf "${name} - Install dotfiles using GNU Stow\nv${VERSION}\n"
@@ -47,9 +46,9 @@ parseArgs() {
     		exit 0
     		;;
     	-l|--list)
-            list
-            exit 0
-            ;;
+        list
+        exit 0
+        ;;
     	--name)
     		shift
     		name="$1"

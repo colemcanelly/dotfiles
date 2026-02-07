@@ -5,8 +5,16 @@ source ~/.local/lib/check_cmds.sh
 check_cmds fzf
 
 
-chooseBranch() {
-    git branch --sort=-committerdate | grep -v "^\\*" | fzf --height=20% --reverse --info=inline
+showPicker() {
+  git branch --sort=-committerdate \
+  | grep -v "^\\*" \
+  | fzf --height=20% --reverse --info=inline
 }
 
-b=$(chooseBranch) && [ -n \"$b\" ] && git switch $b
+choose() {
+  local branch
+  branch=$(showPicker)
+  (( $? == 0 )) && test -n "$branch" && git switch $branch
+}
+
+choose

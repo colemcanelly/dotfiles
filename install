@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # ==================== GLOBALS ====================
 # Script Info
@@ -47,7 +48,7 @@ function stow() {
 	[[ $SIMULATE == true ]] && opts+=" --simulate";
 	[[ $RESTOW == true ]] && opts+=" --restow";
 
-	local out="$(command stow $opts "$@" 2>&1)"
+  local out ; out="$(command stow $opts "$@" 2>&1)"
 	local exit_code=$?
 
 	if rg -q 'WARNING! stowing [\w-]* would cause conflicts' <<< "$out"; then

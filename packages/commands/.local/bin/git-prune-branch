@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source ~/.local/lib/check_cmds.sh
+
+check_cmds rg
+
+
+git branch -vv | rg 'origin/(.*): gone' -or '$1' | xargs -I{} git branch -d "$@" {}

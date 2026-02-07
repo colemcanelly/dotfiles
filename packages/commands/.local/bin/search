@@ -1,11 +1,14 @@
- #!/usr/bin/env bash
+#!/usr/bin/env bash
+
 source ~/.local/lib/check_cmds.sh
 
 # Check for required commands
-check_cmds rg fzf code bat
+check_cmds rg fzf vim bat
 
 # Source: https://www.somescripting.com/posts/20240615132037
 # code --goto {1}:{2}   open in code instead of vim
+
+# zed {1}:{2}  open in zed instead of vim
 
 rfv() (
     RELOAD='reload:rg --column --color=always --smart-case {q} || :'
