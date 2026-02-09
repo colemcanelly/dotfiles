@@ -6,7 +6,7 @@
 check_cmds() {
 	local fail="false"
 	for cmd in "$@"; do
-		command -v $cmd &> /dev/null && continue;
+		command -v "$cmd" &> /dev/null && continue;
 		printf '%s: command not found\n' "$cmd"
 		fail="true"
 	done
@@ -37,7 +37,7 @@ check_ssh_key() {
 }
 
 load_ssh_key() {
-	./packages/utils/.local/lib/auth/ssh-login.sh || panic "Failed to load SSH key. Please check your SSH configuration and try again."
+	./packages/utils/.local/lib/auth/ssh-login.sh || panic "Failed to load SSH key"
 }
 
 verify_ssh_key() {
@@ -53,7 +53,7 @@ setup_ssh() {
 	verify_ssh_key || exit 1
 
 	repo_ssh="git@github.com:colemcanelly/dotfiles.git"
-	git remote set-url origin $repo_ssh || panic "Failed to set remote URL. Please check your SSH key and try again."
+	git remote set-url origin $repo_ssh || panic "Failed to set remote URL"
 }
 
 download() {
@@ -63,12 +63,12 @@ download() {
 
 	local repo_https="https://github.com/colemcanelly/dotfiles.git"
 
-	git clone $repo_https $loc || panic "Failed to clone repository. Please check your internet connection and try again."
-	cd $loc
+	git clone $repo_https $loc || panic "Failed to clone repository"
+	cd $loc || panic "Failed to change directory"
 }
 
 download_submodules() {
-	git submodule update --init --recursive || panic "Failed to download submodules. Please check your internet connection and try again."
+	git submodule update --init --recursive || panic "Failed to download submodules"
 }
 
 
