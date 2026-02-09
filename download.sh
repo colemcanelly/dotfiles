@@ -23,7 +23,6 @@ REQS=($(curl -fsS https://raw.githubusercontent.com/colemcanelly/dotfiles/refs/h
 check_cmds git curl "${REQS[@]}"
 
 REPO_SSH="git@github.com:colemcanelly/dotfiles.git"
-SSH_AGENT_SCRIPT="$(curl -sSL https://raw.githubusercontent.com/colemcanelly/dotfiles/refs/heads/master/packages/utils/.local/lib/auth/ssh-login.sh)"
 
 
 generate_ssh_key() {
@@ -33,7 +32,8 @@ generate_ssh_key() {
 }
 
 load_ssh_key() {
-	source /dev/stdin <<< "$SSH_AGENT_SCRIPT" || panic "Failed to load SSH key"
+	eval "$(ssh-agent -s)"
+	ssh-add ~/.ssh/id_ed25519
 }
 
 check_ssh_key() {
