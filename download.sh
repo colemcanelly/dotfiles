@@ -33,7 +33,7 @@ generate_ssh_key() {
 }
 
 load_ssh_key() {
-	bash <<< "$SSH_AGENT_SCRIPT" || panic "Failed to load SSH key"
+	source /dev/stdin <<< "$SSH_AGENT_SCRIPT" || panic "Failed to load SSH key"
 }
 
 check_ssh_key() {
