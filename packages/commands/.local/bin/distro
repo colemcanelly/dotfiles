@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+
+source /etc/os-release
+LOGO=""
+
+case "$ID" in
+	fedora)
+		LOGO=""
+		;;
+	ubuntu)
+		LOGO=""
+		;;
+	*)
+		echo "Unsupported distribution: $ID"
+		exit 1
+		;;
+esac
+
+case "$1" in
+	--logo)
+		echo "$LOGO"
+		exit 0
+		;;
+	--name)
+		echo "$ID"
+		exit 0
+		;;
+	*)
+esac
+echo "$ID"
+exit 0
