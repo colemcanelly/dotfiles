@@ -20,7 +20,7 @@ echo -en " bat-extras"
 if ! check_installed "$prefix"; then
     # echo ""
     log echo "$(small)  this may take several moments...$(reset)"
-    log ./build.sh --install --prefix=${prefix}
+    log ./build.sh --install --prefix=$(dirname "$prefix")
 fi
 
 echo "$(small)  ...done$(reset)"
