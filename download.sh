@@ -55,8 +55,6 @@ setup_ssh() {
 	test -f $HOME/.ssh/id_ed25519 || generate_ssh_key
 	load_ssh_key
 	verify_ssh_key || exit 1
-
-	git remote set-url origin $REPO_SSH || panic "Failed to set remote URL"
 }
 
 download() {
