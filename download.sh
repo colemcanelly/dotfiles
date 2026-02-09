@@ -50,7 +50,7 @@ download() {
 
 	local repo_https="https://github.com/colemcanelly/dotfiles.git"
 
-	git clone $repo_https $loc || panic "Failed to clone repository. Please check your internet connection and try again."
+	git clone --recursive $repo_https $loc || panic "Failed to clone repository. Please check your internet connection and try again."
 	cd $loc
 }
 
