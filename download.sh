@@ -36,11 +36,24 @@ check_ssh_key() {
 	esac
 }
 
+load_ssh_key() {
+	./packages/utils/.local/lib/auth/ssh-login.sh || panic "Failed to load SSH key. Please check your SSH configuration and try again."
+}
+
 verify_ssh_key() {
 	while ! verify_ssh_key; do
 		echo "SSH key verification failed. Please ensure your SSH key is added to your GitHub account and try again."
 		read -p "Press Enter to retry..."
 	done
+}
+
+setup_ssh() {
+	test -f $HOME/.ssh/id_ed25519 || generate_ssh_key
+	load_ssh_key
+	verify_ssh_key || exit 1
+
+	repo_ssh="git@github.com:colemcanelly/dotfiles.git"
+	git remote set-url origin $repo_ssh || panic "Failed to set remote URL. Please check your SSH key and try again."
 }
 
 download() {
@@ -50,25 +63,20 @@ download() {
 
 	local repo_https="https://github.com/colemcanelly/dotfiles.git"
 
-	git clone --recursive $repo_https $loc || panic "Failed to clone repository. Please check your internet connection and try again."
+	git clone $repo_https $loc || panic "Failed to clone repository. Please check your internet connection and try again."
 	cd $loc
 }
 
-setup_ssh() {
-	test -f $HOME/.ssh/id_ed25519 || generate_ssh_key
-	verify_ssh_key || exit 1
-
-	repo_ssh="git@github.com:colemcanelly/dotfiles.git"
-	git remote set-url origin $repo_ssh || panic "Failed to set remote URL. Please check your SSH key and try again."
+download_submodules() {
+	git submodule update --init --recursive || panic "Failed to download submodules. Please check your internet connection and try again."
 }
 
 
 main() {
-	download || panic "Failed to download dotfiles. Please check your internet connection and try again."
-
-	./install || panic "Installation failed."
-
+	download
 	setup_ssh || panic "SSH setup failed."
+	download_submodules
+	./install || panic "Installation failed."
 
 	echo "Setup complete! Your dotfiles have been installed and your SSH key is configured for GitHub."
 }
