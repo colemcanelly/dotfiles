@@ -2,6 +2,7 @@
 
 # Author: Cole McAnelly
 # Description: This script automates the setup of dotfiles from a GitHub repository
+# Run: curl -sSL https://raw.githubusercontent.com/colemcanelly/dotfiles/refs/heads/master/download.sh | bash
 
 check_cmds() {
 	local fail="false"
@@ -18,14 +19,21 @@ panic() {
 	exit 1
 }
 
-reqs=($(curl -fsS https://raw.githubusercontent.com/colemcanelly/dotfiles/refs/heads/master/requirements.txt))
-check_cmds git "${reqs[@]}"
+REQS=($(curl -fsS https://raw.githubusercontent.com/colemcanelly/dotfiles/refs/heads/master/requirements.txt))
+check_cmds git curl "${REQS[@]}"
+
+REPO_SSH="git@github.com:colemcanelly/dotfiles.git"
+SSH_AGENT_SCRIPT="$(curl -sSL https://raw.githubusercontent.com/colemcanelly/dotfiles/refs/heads/master/packages/utils/.local/lib/auth/ssh-login.sh)"
 
 
 generate_ssh_key() {
 	echo "Generating SSH key..."
 	read -p "Enter your email for SSH key: " email
 	ssh-keygen -t ed25519 -C "$email"
+}
+
+load_ssh_key() {
+	bash <<< "$SSH_AGENT_SCRIPT" || panic "Failed to load SSH key"
 }
 
 check_ssh_key() {
@@ -36,12 +44,8 @@ check_ssh_key() {
 	esac
 }
 
-load_ssh_key() {
-	./packages/utils/.local/lib/auth/ssh-login.sh || panic "Failed to load SSH key"
-}
-
 verify_ssh_key() {
-	while ! verify_ssh_key; do
+	while ! check_ssh_key; do
 		echo "SSH key verification failed. Please ensure your SSH key is added to your GitHub account and try again."
 		read -p "Press Enter to retry..."
 	done
@@ -52,30 +56,21 @@ setup_ssh() {
 	load_ssh_key
 	verify_ssh_key || exit 1
 
-	repo_ssh="git@github.com:colemcanelly/dotfiles.git"
-	git remote set-url origin $repo_ssh || panic "Failed to set remote URL"
+	git remote set-url origin $REPO_SSH || panic "Failed to set remote URL"
 }
 
 download() {
 	local loc="$HOME/.config/.dotfiles"
-	test -d $loc && panic "Nothing to do"
-	mkdir -p $(dirname $loc)
+	test -d "$loc" && panic "Nothing to do"
+	mkdir -p $(dirname "$loc")
 
-	local repo_https="https://github.com/colemcanelly/dotfiles.git"
-
-	git clone $repo_https $loc || panic "Failed to clone repository"
-	cd $loc || panic "Failed to change directory"
+	git clone --recursive "$REPO_SSH" "$loc" || panic "Failed to clone repository"
+	cd "$loc" || panic "Failed to change directory"
 }
-
-download_submodules() {
-	git submodule update --init --recursive || panic "Failed to download submodules"
-}
-
 
 main() {
-	download
 	setup_ssh || panic "SSH setup failed."
-	download_submodules
+	download
 	./install || panic "Installation failed."
 
 	echo "Setup complete! Your dotfiles have been installed and your SSH key is configured for GitHub."
