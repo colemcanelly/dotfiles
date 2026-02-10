@@ -9,7 +9,7 @@ case "$ID" in
 		LOGO=""
 		;;
 	ubuntu)
-		LOGO=""
+		LOGO="󰕈"
 		;;
 	*)
 		echo "Unsupported distribution: $ID"
