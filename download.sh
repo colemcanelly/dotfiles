@@ -28,7 +28,7 @@ REPO_SSH="git@github.com:colemcanelly/dotfiles.git"
 generate_ssh_key() {
 	echo "Generating SSH key..."
 	read -p "Enter your email for SSH key: " email </dev/tty
-	ssh-keygen -t ed25519 -C "$email"
+	ssh-keygen -t ed25519 -C "$email" </dev/tty
 }
 
 load_ssh_key() {
