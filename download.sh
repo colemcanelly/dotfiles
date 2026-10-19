@@ -27,7 +27,7 @@ REPO_SSH="git@github.com:colemcanelly/dotfiles.git"
 
 generate_ssh_key() {
 	echo "Generating SSH key..."
-	read -p "Enter your email for SSH key: " email
+	read -p "Enter your email for SSH key: " email </dev/tty
 	ssh-keygen -t ed25519 -C "$email"
 }
 
@@ -47,7 +47,7 @@ check_ssh_key() {
 verify_ssh_key() {
 	while ! check_ssh_key; do
 		echo "SSH key verification failed. Please ensure your SSH key is added to your GitHub account and try again."
-		read -p "Press Enter to retry..."
+		read -p "Press Enter to retry..." </dev/tty
 	done
 }
 
