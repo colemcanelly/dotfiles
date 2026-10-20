@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+
+BASE_DIR=$(git rev-parse --show-toplevel 2>/dev/null)
+
+
+usage() {
+    cat << EOF
+ignore v0.1.0
+User freindly interface for ignoring files in git.
+
+Usage: ignore [OPTIONS] FILE...
+
+Arguments:
+    FILE  One or more file paths to the files to be ignored. Must exist in current or sub directory.
+
+Options:
+    --help       Displays this help message
+    --local      Edits the .git/info/exclude file to ignore the file locally
+    --global     Edits the global gitignore file (usually ~/.config/git/ignore)
+EOF
+}
+
+fail() {
+    echo "$1" >&2
+    exit 1
+}
+
+error() {
+    fail "Error: $1"
+}
+
+ensure_file() {
+    [ ! -f "$1" ] && error "File '$1' does not exist.";
+}
+
+
+validate_input() {
+    [ ! -e "$1" ] && error "Path '$1' does not exist.";
+    local target_abs=$(realpath -e "$1")
+    local working_abs=$(realpath "$BASE_DIR")
+
+    [[ "$target_abs" == "$working_abs"/* ]] || error "Path '$1' is not in the current directory or a subdirectory."
+}
+
+get_ignore_file() {
+    local -n ret_value=$1
+
+    local git_dir;
+    if [ "$local_ignore" = true ]; then
+        git_dir=$(git rev-parse --git-dir 2>/dev/null)
+        if [ $? -ne 0 ]; then
+            error "Not a git repository."
+        fi
+        ret_value="$git_dir/info/exclude"
+    elif [ "$global_ignore" = true ]; then
+        ret_value=$(git config --get core.excludesfile)
+        if [ -z "$ret_value" ]; then
+            ret_value="$HOME/.config/git/ignore"
+            mkdir -p "$(dirname "$ret_value")"
+            touch "$ret_value"
+        fi
+    else
+        if [ $? -ne 0 ]; then
+            error "Not a git repository."
+        fi
+        ret_value="$BASE_DIR/.gitignore"
+    fi
+
+    ensure_file "$ret_value"
+}
+
+
+
+[ "$#" -lt 1 ] && fail "Usage: $0 [OPTIONS] FILE...";
+
+
+files=()
+
+for arg in "$@"; do
+    case $arg in
+        --help)
+            usage
+            exit 0
+            ;;
+        --local)
+            local_ignore=true
+            shift
+            ;;
+        --global)
+            global_ignore=true
+            shift
+            ;;
+        *)
+            validate_input "$arg"
+            files+=("${arg#./}")
+            ;;
+    esac
+done
+
+
+get_ignore_file exclude_file
+
+[ -n "$(tail -c1 "$exclude_file")" ] && printf '\n' >> "$exclude_file";
+printf '%s\n' "${files[@]}" | sort -u >> "$exclude_file"

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+source ~/.local/lib/check_cmds.sh
+
+check_cmds fzf
+
+
+showPicker() {
+  git branch --sort=-committerdate \
+  | grep -v "^\\*" \
+  | fzf --height=20% --reverse --info=inline
+}
+
+choose() {
+  local branch
+  branch=$(showPicker)
+  (( $? == 0 )) && test -n "$branch" && git switch $branch
+}
+
+choose

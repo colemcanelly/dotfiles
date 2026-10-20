@@ -1,0 +1,32 @@
+#!/usr/bin/env zsh
+## Load user settings files
+source ~/.config/zsh/settings/lib.zsh
+
+# Lines configured by zsh-newuser-install
+HISTFILE=~/.histfile
+HISTSIZE=1000
+SAVEHIST=2000
+setopt autocd extendedglob nomatch notify
+unsetopt beep
+# End of lines configured by zsh-newuser-install
+# The following lines were added by compinstall
+zstyle :compinstall filename '/home/cole/.zshrc'
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+
+# ==================== Custom ====================
+setopt histignorealldups sharehistory interactive_comments
+
+## Plugins
+source ~/.config/zsh/plugins/lib.zsh
+
+## Login to ssh
+eval $(keychain --eval id_ed25519)
+
+## https://github.com/michel-kraemer/zsh-patina
+# eval "$(~/.cargo/bin/zsh-patina activate)"
+
+## My prompt
+eval "$(starship init zsh)"

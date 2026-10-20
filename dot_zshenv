@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+
+export EDITOR="/usr/sbin/vim"
+export VISUAL="$EDITOR"
+
+
+[ -f ~/.path.env ] && source ~/.path.env

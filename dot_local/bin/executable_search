@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+source ~/.local/lib/check_cmds.sh
+
+# Check for required commands
+check_cmds rg fzf vim bat
+
+# Source: https://www.somescripting.com/posts/20240615132037
+# code --goto {1}:{2}   open in code instead of vim
+
+# zed {1}:{2}  open in zed instead of vim
+
+rfv() (
+    RELOAD='reload:rg --column --color=always --smart-case {q} || :'
+    OPENER='if [[ $FZF_SELECT_COUNT -eq 0 ]]; then
+                vim {1} +{2}     # No selection. Open the current line in Vim.
+            else
+                vim +cw -q {+f}  # Build quickfix list for the selected items.
+            fi'
+    fzf < /dev/null \
+        --disabled --ansi --multi \
+        --bind "start:$RELOAD" --bind "change:$RELOAD" \
+        --bind "enter:become:$OPENER" --bind "ctrl-o:execute:$OPENER" \
+        --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' \
+        --delimiter : \
+        --preview 'bat --style=full --color=always --highlight-line {2} {1}' \
+        --preview-window '~4,+{2}+4/3,<80(up)' \
+        --query "$*"
+)
+
+# Call the rfv function with passed arguments
+rfv "$@"
