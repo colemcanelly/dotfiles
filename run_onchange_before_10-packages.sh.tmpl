@@ -10,51 +10,66 @@ set -euo pipefail
 {{   $uv = concat $uv ((get $p "uv") | default list) -}}
 {{   $npm = concat $npm ((get $p "npm") | default list) -}}
 {{ end -}}
+{{ $dnf = $dnf | uniq }}{{ $cargo = $cargo | uniq }}{{ $go = $go | uniq }}{{ $uv = $uv | uniq }}{{ $npm = $npm | uniq -}}
 # profile: {{ .profile }} ({{ $tiers | join ", " }})
+
+{{ template "install-lib.sh" . }}
 
 export PATH="$HOME/.cargo/bin:$HOME/go/bin:$HOME/.local/bin:$PATH"
 
-function have() {
-	command -v "$1" >/dev/null && return 0
-	echo "[packages] $1 not found, skipping: $2" >&2
-	return 1
-}
-
 {{ if eq .chezmoi.osRelease.id "fedora" -}}
-sudo dnf install -y {{ $dnf | uniq | join " " }}
+dnf_packages=({{ $dnf | join " " }})
+# Ask for the password up front; the step itself runs with its output hidden
+if sudo -v; then
+	step dnf-packages sudo dnf install -y --skip-unavailable "${dnf_packages[@]}"
+	for p in "${dnf_packages[@]}"; do
+		rpm -q --quiet "$p" || { echo "  missing: $p"; FAILED+=("$p"); }
+	done
+else
+	echo "Installing dnf-packages... $FAIL (no sudo)"
+	FAILED+=("${dnf_packages[@]}")
+fi
 {{ else -}}
-echo "[packages] Not Fedora, install these yourself: {{ $dnf | uniq | join " " }}" >&2
+echo "Not Fedora, install these yourself: {{ $dnf | join " " }}"
 {{ end -}}
 
 {{ if $cargo -}}
-if have cargo "{{ $cargo | uniq | join " " }}"; then
-	command -v cargo-binstall >/dev/null || cargo install cargo-binstall
-	cargo binstall -y {{ $cargo | uniq | join " " }}
+if need cargo {{ $cargo | join " " }}; then
+	command -v cargo-binstall >/dev/null || step cargo-binstall cargo install cargo-binstall
+{{ range $cargo }}	step {{ . }} cargo binstall -y {{ . }}
+{{ end -}}
 fi
 {{ end -}}
 
 {{ if $go -}}
-if have go "{{ $go | uniq | join " " }}"; then
-{{ range $go | uniq }}	go install {{ . }}
+if need go {{ range $go }}{{ . | base | splitList "@" | first }} {{ end }}; then
+{{ range $go }}	step {{ . | base | splitList "@" | first }} go install {{ . }}
 {{ end -}}
 fi
 {{ end -}}
 
 {{ if $uv -}}
-if have uv "{{ $uv | uniq | join " " }}"; then
-{{ range $uv | uniq }}	uv tool install {{ . }}
+if need uv {{ $uv | join " " }}; then
+{{ range $uv }}	step {{ . }} uv tool install {{ . }}
 {{ end -}}
 fi
 {{ end -}}
 
-if command -v bob >/dev/null; then bob use stable; fi
+if command -v bob >/dev/null; then step nvim bob use stable; fi
 
 {{ if $npm -}}
-if have fnm "{{ $npm | uniq | join " " }}"; then
-	eval "$(fnm env)"
-	fnm install --lts
-	# Keep an existing default node; only pick one on a fresh machine
+# Keep an existing default node; only pick one on a fresh machine
+function install_node() {
+	fnm install --lts || return
 	fnm use default 2>/dev/null || { fnm default lts-latest && fnm use default; }
-	npm install -g {{ $npm | uniq | join " " }}
+}
+
+if need fnm node {{ $npm | join " " }}; then
+	eval "$(fnm env)"
+	step node install_node
+{{ range $npm }}	step {{ . }} npm install -g {{ . }}
+{{ end -}}
 fi
 {{ end -}}
+
+summary {{ joinPath .chezmoi.sourceDir .chezmoi.sourceFile | quote }}

@@ -7,45 +7,55 @@ set -euo pipefail
 {{   if get $p "cargo" }}{{ $needCargo = true }}{{ end -}}
 {{   if get $p "uv" }}{{ $needUv = true }}{{ end -}}
 {{ end -}}
+{{ $fedora := eq .chezmoi.osRelease.id "fedora" -}}
 # profile: {{ .profile }} ({{ $tiers | join ", " }})
 # Toolchains the package script needs. Installers must not touch rc files:
 # chezmoi owns those, and .profile/.path.env already source ~/.cargo/env.
 
+{{ template "install-lib.sh" . }}
+
 export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 
-{{ $fedora := eq .chezmoi.osRelease.id "fedora" -}}
-
 {{ if $needCargo -}}
-if ! command -v cargo >/dev/null; then
+function install_rust() {
 {{- if $fedora }}
-	sudo dnf install -y rustup
-	rustup-init -y --no-modify-path --profile minimal --default-toolchain stable
+	sudo dnf install -y rustup \
+		&& rustup-init -y --no-modify-path --profile minimal --default-toolchain stable
 {{- else }}
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
 		| sh -s -- -y --no-modify-path --profile minimal --default-toolchain stable
 {{- end }}
-fi
+}
 
 # Prebuilt binaries, so `cargo binstall` never has to compile itself
-if ! command -v cargo-binstall >/dev/null; then
+function install_binstall() {
 	curl -L --proto '=https' --tlsv1.2 -sSf \
 		https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh \
 		| bash
-fi
+}
+
+command -v cargo >/dev/null || step rust install_rust
+command -v cargo-binstall >/dev/null || step cargo-binstall install_binstall
 {{ end -}}
 
 {{ if $needUv -}}
-if ! command -v uv >/dev/null; then
+function install_uv() {
 {{- if $fedora }}
 	sudo dnf install -y uv
 {{- else }}
 	curl -LsSf https://astral.sh/uv/install.sh | env UV_NO_MODIFY_PATH=1 sh
 {{- end }}
-fi
+}
+
+command -v uv >/dev/null || step uv install_uv
 {{ end -}}
 
 {{ if has "claude" $tiers -}}
-if ! command -v claude >/dev/null; then
+function install_claude() {
 	curl -fsSL https://claude.ai/install.sh | bash
-fi
+}
+
+command -v claude >/dev/null || step claude install_claude
 {{ end -}}
+
+summary {{ joinPath .chezmoi.sourceDir .chezmoi.sourceFile | quote }}
