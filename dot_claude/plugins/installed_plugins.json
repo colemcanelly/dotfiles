@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "plugins": {
+    "pyright-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/home/cole/.claude/plugins/cache/claude-plugins-official/pyright-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-09-22T19:04:04.673Z",
+        "lastUpdated": "2026-09-22T19:04:04.673Z",
+        "gitCommitSha": "db467cc56673fc963ca418b4165c688dfbe77007"
+      }
+    ],
+    "typescript-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/home/cole/.claude/plugins/cache/claude-plugins-official/typescript-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-09-22T19:04:32.726Z",
+        "lastUpdated": "2026-09-22T19:04:32.726Z",
+        "gitCommitSha": "db467cc56673fc963ca418b4165c688dfbe77007"
+      }
+    ],
+    "rust-analyzer-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/home/cole/.claude/plugins/cache/claude-plugins-official/rust-analyzer-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-09-22T19:04:32.807Z",
+        "lastUpdated": "2026-09-22T19:04:32.807Z",
+        "gitCommitSha": "db467cc56673fc963ca418b4165c688dfbe77007"
+      }
+    ],
+    "clangd-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/home/cole/.claude/plugins/cache/claude-plugins-official/clangd-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-09-22T19:04:32.866Z",
+        "lastUpdated": "2026-09-22T19:04:32.866Z",
+        "gitCommitSha": "db467cc56673fc963ca418b4165c688dfbe77007"
+      }
+    ]
+  }
+}
