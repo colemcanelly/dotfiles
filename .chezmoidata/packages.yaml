@@ -1,0 +1,46 @@
+# Each machine picks a profile at `chezmoi init`; a profile is a list of tiers.
+profiles:
+  minimal:     [base]
+  workstation: [base, shell, claude]
+  dev:         [base, shell, claude, dev, services]
+
+packages:
+  base:        # anywhere you need your git/tmux/nvim configs
+    dnf: [git, git-delta, ripgrep, fd-find, fzf, bat, jq, tmux, tree, unzip, age, python3, gcc]
+    cargo: [sd, bob-nvim]
+  shell:       # the nice interactive shell
+    dnf: [zsh, keychain, fastfetch, xclip]
+    cargo: [starship, eza]
+  claude:      # what the hook, CLAUDE.md and MCP config call
+    cargo: [ast-grep]
+    uv: [code-review-graph, pyright]
+  dev:
+    dnf:
+      - ShellCheck
+      - pandoc-cli
+      - yq
+      - moreutils
+      - make
+      - cmake
+      - clang
+      # headless Chrome runtime for mdpdf
+      - nss
+      - atk
+      - at-spi2-atk
+      - cups-libs
+      - gtk3
+      - pango
+      - alsa-lib
+      - libXcomposite
+      - libXdamage
+      - libXrandr
+      - mesa-libgbm
+    cargo: [fnm, hurl, jwt-cli, minijinja-cli, cargo-update]
+    uv: [ruff, pyan3]
+    npm: [mdpdf, typescript, typescript-language-server, nx]
+  services:    # still deciding where these belong
+    dnf: [postgresql, podman, golang]
+    go: [github.com/noborus/ov@latest]
+
+# A record only, never installed
+someday: [cbonsai, valgrind, nginx, pass]

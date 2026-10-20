@@ -1,0 +1,13 @@
+{{- $profile := promptChoiceOnce . "profile" "Machine profile" (list "minimal" "workstation" "dev") -}}
+{{- $windowsUser := "" -}}
+{{- if .chezmoi.kernel.osrelease | lower | contains "microsoft" -}}
+{{-   $windowsUser = promptStringOnce . "windowsUser" "Windows username (for /mnt/c/Users/...)" .chezmoi.username -}}
+{{- end -}}
+[data]
+    profile = {{ $profile | quote }}
+    windowsUser = {{ $windowsUser | quote }}
+
+# Scripts never land in $HOME; hide their pending runs from `chezmoi status`
+# (see them with `chezmoi status --include=scripts`)
+[status]
+    exclude = ["scripts"]

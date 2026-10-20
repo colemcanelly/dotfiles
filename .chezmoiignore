@@ -1,0 +1,15 @@
+{{ $tiers := index .profiles .profile -}}
+{{ if not (has "shell" $tiers) }}
+.zshrc
+.zshenv
+.zlogin
+.config/zsh
+.config/starship.toml
+.config/fastfetch
+{{ end }}
+{{ if not (has "claude" $tiers) }}
+.claude
+{{ end }}
+{{ if not (has "services" $tiers) }}
+.zsh/completions/_psql_service
+{{ end }}

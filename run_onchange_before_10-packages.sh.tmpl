@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+set -euo pipefail
+{{ $tiers := index .profiles .profile -}}
+{{ $dnf := list }}{{ $cargo := list }}{{ $go := list }}{{ $uv := list }}{{ $npm := list -}}
+{{ range $tiers -}}
+{{   $p := index $.packages . -}}
+{{   $dnf = concat $dnf ((get $p "dnf") | default list) -}}
+{{   $cargo = concat $cargo ((get $p "cargo") | default list) -}}
+{{   $go = concat $go ((get $p "go") | default list) -}}
+{{   $uv = concat $uv ((get $p "uv") | default list) -}}
+{{   $npm = concat $npm ((get $p "npm") | default list) -}}
+{{ end -}}
+# profile: {{ .profile }} ({{ $tiers | join ", " }})
+
+export PATH="$HOME/.cargo/bin:$HOME/go/bin:$HOME/.local/bin:$PATH"
+
+function have() {
+	command -v "$1" >/dev/null && return 0
+	echo "[packages] $1 not found, skipping: $2" >&2
+	return 1
+}
+
+{{ if eq .chezmoi.osRelease.id "fedora" -}}
+sudo dnf install -y {{ $dnf | uniq | join " " }}
+{{ else -}}
+echo "[packages] Not Fedora, install these yourself: {{ $dnf | uniq | join " " }}" >&2
+{{ end -}}
+
+{{ if $cargo -}}
+if have cargo "{{ $cargo | uniq | join " " }}"; then
+	command -v cargo-binstall >/dev/null || cargo install cargo-binstall
+	cargo binstall -y {{ $cargo | uniq | join " " }}
+fi
+{{ end -}}
+
+{{ if $go -}}
+if have go "{{ $go | uniq | join " " }}"; then
+{{ range $go | uniq }}	go install {{ . }}
+{{ end -}}
+fi
+{{ end -}}
+
+{{ if $uv -}}
+if have uv "{{ $uv | uniq | join " " }}"; then
+{{ range $uv | uniq }}	uv tool install {{ . }}
+{{ end -}}
+fi
+{{ end -}}
+
+if command -v bob >/dev/null; then bob use stable; fi
+
+{{ if $npm -}}
+if have fnm "{{ $npm | uniq | join " " }}"; then
+	eval "$(fnm env)"
+	fnm install --lts
+	# Keep an existing default node; only pick one on a fresh machine
+	fnm use default 2>/dev/null || { fnm default lts-latest && fnm use default; }
+	npm install -g {{ $npm | uniq | join " " }}
+fi
+{{ end -}}
