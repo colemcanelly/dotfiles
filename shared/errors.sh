@@ -6,7 +6,7 @@ unset src_dir
 # ################# UTILS #################
 function checkTrace() {
     local args=("$@");
-    if [[ " $@ " =~ " --trace " ]]; then
+    if [[ " $* " =~ " --trace " ]]; then
         printf "${args[@]/--trace/}";
         return 1
     fi

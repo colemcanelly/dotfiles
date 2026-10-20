@@ -16,3 +16,6 @@
 [submodule "zsh/.config/zsh/plugins/fast-syntax-highlighting"]
 	path = packages/zsh/.config/zsh/plugins/fast-syntax-highlighting
 	url = git@github.com:zdharma-continuum/fast-syntax-highlighting.git
+[submodule "packages/zsh/.config/zsh/plugins/zsh-shift-select"]
+	path = packages/zsh/.config/zsh/plugins/zsh-shift-select
+	url = https://github.com/jirutka/zsh-shift-select

@@ -4,6 +4,7 @@ BASE_PATH=~/.config/zsh/plugins
 plugins=(
     /nx-completion/nx-completion.plugin.zsh
     /fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+    /zsh-shift-select/zsh-shift-select.plugin.zsh
 )
 
 

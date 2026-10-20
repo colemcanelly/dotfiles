@@ -1,0 +1,20 @@
+set editing-mode emacs
+
+# Ctrl + Right / Left
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+
+# Home / End
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+"\e[H": beginning-of-line
+"\e[F": end-of-line
+
+# Delete
+"\e[3~": delete-char
+
+# Ctrl + Backspace
+"\C-h": backward-kill-word
+
+# Ctrl + Delete
+"\e[3;5~": kill-word
