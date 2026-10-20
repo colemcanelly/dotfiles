@@ -1,0 +1,11 @@
+
+# Don't let ripgrep vomit really long lines to my terminal, and show a preview.
+--max-columns=150
+--max-columns-preview
+
+# Custom Types
+--type-add=zmod:*.{epro,mdh,h}
+
+
+# Using glob patterns to include/exclude files or folders
+--glob=!.git/*

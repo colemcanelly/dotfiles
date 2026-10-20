@@ -1,0 +1,45 @@
+#compdef psql
+
+# Augment zsh's stock psql completion (the _postgresql file shipped with zsh) so
+# the first operand also offers connection services from ~/.pg_service.conf, e.g.
+#
+#   psql ser<TAB>   ->   service=myservice
+#
+# How this works:
+# - The `#compdef psql` line above registers THIS file for `psql`, shadowing the
+#   stock _postgresql binding for psql only. Other tools (pg_dump, createdb, ...)
+#   keep using _postgresql directly, so nothing else is affected.
+# - The stock helpers are all defined behind `(( $+functions[foo] )) || foo()`
+#   guards. By defining our own __pgsql_databases *before* _postgresql loads, the
+#   stock definition is skipped and ours wins. Everything else falls through to
+#   the stock completer unchanged.
+
+# Our override: stock database completion + pg_service.conf services.
+__pgsql_databases() {
+  local conninfo
+  local -a expl tmp services
+
+  __pgsql_get_conninfo -O dbname
+  __pgsql_call_psql tmp databases "$conninfo" -c '
+    SELECT datname
+    FROM   pg_catalog.pg_database;
+  '
+  tmp+=( $PGDATABASE template0 template1 )
+
+  # Section headers in pg_service.conf become conninfo words, e.g. "service=foo".
+  services=(
+    ${(f)"$(sed -n 's/^\[\(.*\)\]/service=\1/p' \
+      ${PGSERVICEFILE:-~/.pg_service.conf} 2>/dev/null)"}
+  )
+
+  _wanted databases expl 'PostgreSQL database' compadd -a "$@" - tmp
+  (( $#services )) &&
+    _wanted services expl 'PostgreSQL service' compadd "$@" -a - services
+}
+
+# Hand off to the stock completer. Calling it autoloads the _postgresql file,
+# which defines the remaining __pgsql_* / _pgsql_* helpers (ours is preserved by
+# the guard) and routes to _pgsql_psql, whose operand-1 action calls the
+# __pgsql_databases we just defined.
+(( $+functions[_postgresql] )) || autoload -Uz _postgresql
+_postgresql "$@"
