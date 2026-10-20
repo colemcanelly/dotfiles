@@ -35,6 +35,8 @@ packages:
       - libXdamage
       - libXrandr
       - mesa-libgbm
+      - openssl
+      - openssl-devel
     cargo: [fnm, hurl, jwt-cli, minijinja-cli, cargo-update]
     uv: [ruff, pyan3]
     npm: [mdpdf, typescript, typescript-language-server, nx]

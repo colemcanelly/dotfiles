@@ -14,4 +14,5 @@
 # Case-Insensitive Auto Completion
  bind "set completion-ignore-case on"
 
-eval "$(batman --export-env)"
+eval $(keychain --eval id_ed25519)
+if command -v batman; then eval "$(batman --export-env)"; fi

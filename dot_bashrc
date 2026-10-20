@@ -26,11 +26,7 @@ unset rc
 
 [ -f .bash_aliases ] && source .bash_aliases;
 
-# dotfiles
-shopt -s extglob
-source /home/cole/.config/.dotfiles/packages/bash/include/lib.sh
-# dotfiles end
 . "$HOME/.cargo/env"
 
 # Flyline - enhanced Bash experience
-enable -f /home/cole/.local/lib/libflyline.so flyline
+# enable -f /home/cole/.local/lib/libflyline.so flyline
