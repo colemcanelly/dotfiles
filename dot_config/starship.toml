@@ -7,6 +7,8 @@ $git_state\
 $git_status\
 $cmd_duration\
 $python\
+$nodejs\
+$dotnet\
 $line_break\
 $character"""
 
@@ -45,3 +47,13 @@ style = "yellow"
 [python]
 format = "[$virtualenv]($style) "
 style = "bright-black"
+
+[nodejs]
+disabled = false
+format = "[⬢]($style) [($version)](bright-black) "
+style = "bold green"
+
+[dotnet]
+disabled = false
+format = "[]($style) [($version)](bright-black) "
+style = "bold purple"

@@ -4,18 +4,43 @@ LOG_DIR={{ .chezmoi.sourceDir | quote }}/.logs
 mkdir -p "$LOG_DIR"
 FAILED=()
 
+
+
+declare -A styles=(
+	[bold]=1
+	[red]=31
+	[green]=32
+	[yellow]=33
+	[blue]=34
+	[light-red]=91
+	[light-green]=92
+	[light-yellow]=93
+	[light-blue]=94
+)
+for c in "${!styles[@]}"; do
+	v="${styles[$c]}";
+	eval "$c() { printf \$'\e[${v}m%s\e[0m' \"\$*\"; }";
+done
+
 if [[ -t 1 ]]; then
-	PASS=$'\e[32mpass\e[0m' FAIL=$'\e[31mfail\e[0m' SKIP=$'\e[33mskip\e[0m'
+	PASS=$(green pass) FAIL=$(red fail) SKIP=$(yellow skip)
 else
 	PASS=pass FAIL=fail SKIP=skip
 fi
+
+cleanup() {
+    pkill -P $$
+    exit 1
+}
+trap cleanup SIGINT SIGTERM
+
 
 # step <name> <cmd...>: run cmd with all output in $LOG_DIR/<name>.log
 function step() {
 	local name="$1"; shift
 	local log="$LOG_DIR/$name.log"
 	printf '# %s\n# %s\n' "$(date -Is)" "$*" > "$log"
-	printf 'Installing %s... ' "$name"
+	printf '    %s... ' "$name"
 
 	local code=0
 	"$@" >>"$log" 2>&1 </dev/null || code=$?
@@ -34,7 +59,7 @@ function need() {
 
 	local name
 	for name in "$@"; do
-		echo "Installing $name... $SKIP (no $cmd)"
+		echo "$name... $SKIP (no $cmd)"
 		FAILED+=("$name")
 	done
 	return 1

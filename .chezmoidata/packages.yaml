@@ -39,7 +39,7 @@ packages:
       - openssl-devel
     cargo: [fnm, hurl, jwt-cli, minijinja-cli, cargo-update]
     uv: [ruff, pyan3]
-    npm: [mdpdf, typescript, typescript-language-server, nx]
+    npm: [mdpdf, typescript, typescript-language-server]
   services:    # still deciding where these belong
     dnf: [postgresql, podman, golang]
     go: [github.com/noborus/ov@latest]
