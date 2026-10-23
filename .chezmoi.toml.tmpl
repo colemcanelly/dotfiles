@@ -1,6 +1,6 @@
 {{- $profile := promptChoiceOnce . "profile" "Machine profile" (list "minimal" "workstation" "dev") -}}
 {{- $windowsUser := "" -}}
-{{- if .chezmoi.kernel.osrelease | lower | contains "microsoft" -}}
+{{- if dig "kernel" "osrelease" "" .chezmoi | lower | contains "microsoft" -}}
 {{-   $windowsUser = promptStringOnce . "windowsUser" "Windows username (for /mnt/c/Users/...)" .chezmoi.username -}}
 {{- end -}}
 [data]

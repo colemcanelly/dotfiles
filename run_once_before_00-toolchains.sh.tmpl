@@ -7,7 +7,7 @@ set -euo pipefail
 {{   if get $p "cargo" }}{{ $needCargo = true }}{{ end -}}
 {{   if get $p "uv" }}{{ $needUv = true }}{{ end -}}
 {{ end -}}
-{{ $fedora := eq .chezmoi.osRelease.id "fedora" -}}
+{{ $fedora := eq (dig "osRelease" "id" "" .chezmoi) "fedora" -}}
 # profile: {{ .profile }} ({{ $tiers | join ", " }})
 # Toolchains the package script needs. Installers must not touch rc files:
 # chezmoi owns those, and .profile/.path.env already source ~/.cargo/env.
